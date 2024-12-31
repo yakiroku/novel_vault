@@ -89,7 +89,7 @@ def main():
 
 if __name__ == "__main__":
     # 環境変数の読み込み
-    os.environ.clear()
+    # os.environ.clear()
     load_dotenv(".env", override=True)
 
     logger.info("処理を開始します。")
