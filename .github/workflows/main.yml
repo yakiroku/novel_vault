@@ -54,7 +54,11 @@ jobs:
           SUPABASE_DB_PASS: ${{ secrets.SUPABASE_DB_PASS }}
           SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
           SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
-          NOCTURNE_RANKED_URL: ${{ secrets.NOCTURNE_RANKED_URL }}
+          NOCTURNE_DAILY_RANKED_URL: ${{ secrets.NOCTURNE_DAILY_RANKED_URL }}
+          NOCTURNE_WEEKLY_RANKED_URL: ${{ secrets.NOCTURNE_WEEKLY_RANKED_URL }}
+          NOCTURNE_MONTHLY_RANKED_URL: ${{ secrets.NOCTURNE_MONTHLY_RANKED_URL }}
+          NOCTURNE_QUARTERLY_RANKED_URL: ${{ secrets.NOCTURNE_QUARTERLY_RANKED_URL }}
+          NOCTURNE_YEARLY_RANKED_URL: ${{ secrets.NOCTURNE_YEARLY_RANKED_URL }}
           NOCTURNE_TAG_SEARCH_URL: ${{ secrets.NOCTURNE_TAG_SEARCH_URL }}
         run: |
           python main.py

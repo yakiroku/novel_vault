@@ -13,6 +13,7 @@ class TagModel(Base):
     """
     タグを管理するモデル
     """
+    
 
     __tablename__ = "tags"
 

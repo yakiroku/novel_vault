@@ -15,6 +15,7 @@
         <select name="sort" id="sort">
             <option value="desc" {% if sort_order == "desc" %}selected{% endif %}>投稿日時（降順）</option>
             <option value="asc" {% if sort_order == "asc" %}selected{% endif %}>投稿日時（昇順）</option>
+            <option value="id_asc" {% if sort_order == "id_asc" %}selected{% endif %}>ノベルID（昇順）</option>
         </select>
         
         <button type="submit">検索</button>
@@ -27,10 +28,16 @@
         <ul>
             {% for result in results %}
                 <li>
-                    <h2>{{ result.title }}</h2>
+                    <h3>{{ result.title }}</h3>
+                    <p></p>著者: {{ result.author }}</p>
+                    <h3><a href="{{ result.source_url }}" target="_blank">{{ result.chapter }}</a></h3>
                     <p>{{ result.summary }}</p>
                     <p>投稿日: {{ result.posted_at }}</p>
-                    <a href="{{ result.source_url }}" target="_blank">リンク</a>
+                    <!-- 除外ボタン -->
+                    <form action="/exclude" method="post">
+                        <input type="hidden" name="novel_id" value="{{ result.novel_id }}">
+                        <button type="submit">今後検索しない</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>

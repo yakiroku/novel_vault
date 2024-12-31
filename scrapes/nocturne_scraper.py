@@ -126,6 +126,7 @@ class NocturneScraper(NovelScraperInterface):
                                 posted_at = datetime.strptime(
                                     revised_date.split(" ")[0], "%Y/%m/%d"
                                 )  # 改稿日を解析
+                                posted_at = LOCAL_TZ.localize(posted_at)
                             except ValueError:
                                 posted_at = None  # 日付が取得できなかった場合はNoneを設定
                         else:

@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 from db.db_session_manager import DBSessionManager
 from exceptions.missing_data_exception import MissingDataException
+from models.search_tag_model import SearchTagModel
 from repositories.services.search_tag_service import SearchTagService
 from search.novel_search_interface import NovelSearchInterface
 from shared.enums.site import Site
@@ -10,7 +11,7 @@ from util.env_config_loader import EnvConfigLoader
 from util.nocturne_helper import NocturneHelper
 
 
-class NocturneTagSearch(NovelSearchInterface):
+class NocturneTagWeeklySearch(NovelSearchInterface):
 
     def fetch_novel_list(self) -> list[NovelSummary]:
         """複数のタグを繰り返し処理して小説の一覧を取得する"""
@@ -20,9 +21,12 @@ class NocturneTagSearch(NovelSearchInterface):
             search_tag_service = SearchTagService(session)
             search_tag_model_list = search_tag_service.get_all()
 
+        search_tag_model_list.append(SearchTagModel(name="", site=Site.NOCTURNE))
+        
         for tag in search_tag_model_list:
             # 各タグに対応するURLを生成
-            url = f"{EnvConfigLoader.get_variable('NOCTURNE_TAG_SEARCH_URL')}{tag.name}"
+            url = f"{EnvConfigLoader.get_variable('NOCTURNE_TAG_SEARCH_URL')}{tag.name}&order=weekly"
+            # クッキーをrequestsのgetに渡す
             response = NocturneHelper.request(url)
             response.raise_for_status()
 

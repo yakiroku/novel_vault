@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from models import Base
 from settings import LOCAL_TZ
-from sqlalchemy import BigInteger, DateTime, Integer, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, Integer, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class NovelModel(Base):
     author: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     site: Mapped[str] = mapped_column(Text, nullable=False)
-    source_url: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    source_url: Mapped[str] = mapped_column(Text, unique=True, nullable=False, index=True)
     last_posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False
@@ -34,7 +34,17 @@ class NovelModel(Base):
         nullable=False,
     )
     """更新日時"""
+    excluded: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)  # 除外フラグを追加
 
     # リレーション
     chapters: Mapped[list["ChapterModel"]] = relationship("ChapterModel", back_populates="novel")
     tags: Mapped[list["TagModel"]] = relationship("TagModel", secondary="novel_tags", back_populates="novels")
+
+    # 制約の名前を付ける
+    __table_args__ = (
+        # ユニーク制約の名前を指定
+        UniqueConstraint('source_url', name='uq_novels_source_url'),
+        # インデックスに名前を指定
+        Index('ix_novels_source_url', 'source_url'),
+        Index('ix_novels_excluded', 'excluded'),
+    )

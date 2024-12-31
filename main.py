@@ -17,25 +17,25 @@ logger = logging.getLogger(__name__)
 def main():
     logger.info("小説の検索を開始します。")
 
-    # ノクターンランク検索
-    nocturne_ranked_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_RANKED)
-    logger.info("ノクターンランク検索を実行中...")
-    nocturne_ranked_search_list = nocturne_ranked_search.fetch_novel_list()
-    logger.info(
-        f"ノクターンランク検索で {len(nocturne_ranked_search_list)} 件の小説を取得しました。"
-    )
+    # # ノクターンランク検索
+    # nocturne_ranked_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_RANKED)
+    # logger.info("ノクターンランク検索を実行中...")
+    # nocturne_ranked_search_list = nocturne_ranked_search.fetch_novel_list()
+    # logger.info(
+    #     f"ノクターンランク検索で {len(nocturne_ranked_search_list)} 件の小説を取得しました。"
+    # )
 
-    # ノクターンタグ検索
-    nocturne_tag_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_TAG)
-    logger.info("ノクターンタグ検索を実行中...")
-    nocturne_tag_search_list = nocturne_tag_search.fetch_novel_list()
-    logger.info(f"ノクターンタグ検索で {len(nocturne_tag_search_list)} 件の小説を取得しました。")
+    # # ノクターンタグ検索
+    # nocturne_tag_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_TAG)
+    # logger.info("ノクターンタグ検索を実行中...")
+    # nocturne_tag_search_list = nocturne_tag_search.fetch_novel_list()
+    # logger.info(f"ノクターンタグ検索で {len(nocturne_tag_search_list)} 件の小説を取得しました。")
 
-    # ノベルリストのアップサート
-    with DBSessionManager.auto_commit_session() as session:
-        novel_service = NovelService(session)
-        novel_service.upsert_novel_list(nocturne_ranked_search_list + nocturne_tag_search_list)
-        logger.info("ノベルリストをデータベースにアップサートしました。")
+    # # ノベルリストのアップサート
+    # with DBSessionManager.auto_commit_session() as session:
+    #     novel_service = NovelService(session)
+    #     novel_service.upsert_novel_list(nocturne_ranked_search_list + nocturne_tag_search_list)
+    #     logger.info("ノベルリストをデータベースにアップサートしました。")
 
     # 小説の詳細を更新し、章を処理
     with DBSessionManager.auto_commit_session() as session:
@@ -45,46 +45,47 @@ def main():
         logger.info(f"{len(novel_list)} 件の小説がデータベースにあります。")
 
         for novel_index, novel in enumerate(novel_list, start=1):
-            # logger.info(f"({novel_index}/{len(novel_list)}) 小説 {novel.title} のメタデータを取得中...")
-            scraper = ScraperFactory.create_scraper(novel)
-            novel_metadata = scraper.fetch_novel_metadata()
-            if novel.last_posted_at >= novel_metadata.last_posted_at:
-                # logger.info(f"未更新のためスキップします。")
-                continue
-            novel_service.update(novel.source_url, novel_metadata)
-            logger.info(
-                f"({novel_index}/{len(novel_list)}) 小説 {novel.title} のメタデータを更新しました。"
-            )
-
-            logger.info(f"小説 {novel.title} の章を処理中...")
-            chapter_list = scraper.fetch_chapter_list()
-            logger.info(f"小説 {novel.title} で {len(chapter_list)} 件の章が見つかりました。")
-            chapter_model_list = chapter_service.get_novel_by_id(novel.id)
-            if chapter_model_list is None:
-                chapter_model_list = []
-
-            for chapter_index, chapter in enumerate(chapter_list, start=1):
-                # logger.info(f"  ({chapter_index}/{len(chapter_list)}) 章 {chapter.title} を処理中...")
-                # chapter_model_listからchapter_ref_idが一致するものを探す
-                chapter_model = next(
-                    (
-                        chapter_model
-                        for chapter_model in chapter_model_list
-                        if chapter_model.source_url == chapter.source_url
-                    ),
-                    None,
-                )
-                if chapter_model and chapter_model.posted_at >= chapter.posted_at:
+            with session.no_autoflush:
+                # logger.info(f"({novel_index}/{len(novel_list)}) 小説 {novel.title} のメタデータを取得中...")
+                scraper = ScraperFactory.create_scraper(novel)
+                novel_metadata = scraper.fetch_novel_metadata()
+                if novel.last_posted_at >= novel_metadata.last_posted_at:
                     # logger.info(f"未更新のためスキップします。")
                     continue
-                chapter_content = scraper.fetch_chapter_content(chapter.source_url)
-                chapter_service.upsert(
-                    novel_id=novel.id, chapter=chapter, chapter_content=chapter_content
-                )
+                novel_service.update(novel.source_url, novel_metadata)
                 logger.info(
-                    f"({novel_index}/{len(novel_list)}):({chapter_index}/{len(chapter_list)}) {chapter.title} をデータベースにアップサートしました。"
+                    f"({novel_index}/{len(novel_list)}) 小説 {novel.title} のメタデータを更新しました。"
                 )
-            session.commit()
+
+                logger.info(f"小説 {novel.title} の章を処理中...")
+                chapter_list = scraper.fetch_chapter_list()
+                logger.info(f"小説 {novel.title} で {len(chapter_list)} 件の章が見つかりました。")
+                chapter_model_list = chapter_service.get_novel_by_id(novel.id)
+                if chapter_model_list is None:
+                    chapter_model_list = []
+
+                for chapter_index, chapter in enumerate(chapter_list, start=1):
+                    # logger.info(f"  ({chapter_index}/{len(chapter_list)}) 章 {chapter.title} を処理中...")
+                    # chapter_model_listからchapter_ref_idが一致するものを探す
+                    chapter_model = next(
+                        (
+                            chapter_model
+                            for chapter_model in chapter_model_list
+                            if chapter_model.source_url == chapter.source_url
+                        ),
+                        None,
+                    )
+                    if chapter_model and chapter_model.posted_at >= chapter.posted_at:
+                        # logger.info(f"未更新のためスキップします。")
+                        continue
+                    chapter_content = scraper.fetch_chapter_content(chapter.source_url)
+                    chapter_service.upsert(
+                        novel_id=novel.id, chapter=chapter, chapter_content=chapter_content
+                    )
+                    logger.info(
+                        f"({novel_index}/{len(novel_list)}):({chapter_index}/{len(chapter_list)}) {chapter.title} をデータベースにアップサートしました。"
+                    )
+                session.commit()
 
     logger.info("すべての処理が完了しました。")
 

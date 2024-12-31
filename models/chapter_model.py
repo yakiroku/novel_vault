@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Integer, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import TSVECTOR
 
 from models import Base
 from settings import LOCAL_TZ
@@ -20,7 +21,9 @@ class ChapterModel(Base):
     __tablename__ = "chapters"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    novel_id: Mapped[int] = mapped_column(Integer, ForeignKey("novels.id"), nullable=False)
+    novel_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("novels.id"), nullable=False, index=True
+    )
     title: Mapped[str] = mapped_column(Text, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     source_url: Mapped[str] = mapped_column(Text, nullable=False)
@@ -38,4 +41,16 @@ class ChapterModel(Base):
 
     # リレーション
     novel: Mapped["NovelModel"] = relationship("NovelModel", back_populates="chapters")
-    histories: Mapped[list["ChapterHistoryModel"]] = relationship("ChapterHistoryModel", back_populates="chapter")
+    histories: Mapped[list["ChapterHistoryModel"]] = relationship(
+        "ChapterHistoryModel", back_populates="chapter"
+    )
+
+    # 制約の名前を付ける
+    __table_args__ = (
+        # UniqueConstraintの名前指定
+        UniqueConstraint("source_url", name="uq_chapters_source_url"),
+        # インデックスの名前指定
+        Index("ix_chapters_novel_id", "novel_id"),
+        Index("ix_chapters_posted_at", "posted_at"),
+        Index("content_search_idx", "content", postgresql_using="pgroonga"),
+    )

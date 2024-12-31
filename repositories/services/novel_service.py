@@ -35,3 +35,12 @@ class NovelService:
 
     def get_novel_list(self) -> list[NovelModel]:
         return self.query.get_novel_list()
+    
+    def exclude_novel(self, novel_id: int) -> None:
+        """
+        指定された小説を除外する。
+
+        :param session: データベースセッション
+        :param novel_id: 除外する小説のID
+        """
+        self.query.exclude_novel(novel_id)
