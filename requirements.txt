@@ -1,0 +1,10 @@
+pythermalcomfort
+python-dotenv
+Alembic
+SQLAlchemy
+pytz
+requests
+i18nice[YAML]
+pydantic
+beautifulsoup4
+flask

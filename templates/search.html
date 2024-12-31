@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>小説検索</title>
+</head>
+<body>
+    <h1>小説検索</h1>
+    <form action="/" method="get">
+        <!-- 検索ボックス -->
+        <input type="text" name="q" placeholder="検索キーワードを入力" value="{{ keyword }}">
+        
+        <!-- ソート選択 -->
+        <label for="sort">ソート順:</label>
+        <select name="sort" id="sort">
+            <option value="desc" {% if sort_order == "desc" %}selected{% endif %}>投稿日時（降順）</option>
+            <option value="asc" {% if sort_order == "asc" %}selected{% endif %}>投稿日時（昇順）</option>
+        </select>
+        
+        <button type="submit">検索</button>
+    </form>
+
+    <hr>
+
+    <!-- 検索結果 -->
+    {% if results %}
+        <ul>
+            {% for result in results %}
+                <li>
+                    <h2>{{ result.title }}</h2>
+                    <p>{{ result.summary }}</p>
+                    <p>投稿日: {{ result.posted_at }}</p>
+                    <a href="{{ result.source_url }}" target="_blank">リンク</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>該当する結果が見つかりませんでした。</p>
+    {% endif %}
+
+    <!-- ページング -->
+    {% if total_pages > 1 %}
+        <div>
+            {% if current_page > 1 %}
+                <a href="?q={{ keyword }}&sort={{ sort_order }}&page={{ current_page - 1 }}">前のページ</a>
+            {% endif %}
+            <span>ページ {{ current_page }} / {{ total_pages }}</span>
+            {% if current_page < total_pages %}
+                <a href="?q={{ keyword }}&sort={{ sort_order }}&page={{ current_page + 1 }}">次のページ</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>

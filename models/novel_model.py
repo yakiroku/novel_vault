@@ -1,0 +1,40 @@
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from models import Base
+from settings import LOCAL_TZ
+from sqlalchemy import BigInteger, DateTime, Integer, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from models.chapter_model import ChapterModel
+    from models.tag_model import TagModel
+
+class NovelModel(Base):
+    """
+    小説を管理するモデル
+    """
+
+    __tablename__ = "novels"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    author: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    site: Mapped[str] = mapped_column(Text, nullable=False)
+    source_url: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    last_posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(LOCAL_TZ),
+        onupdate=lambda: datetime.now(LOCAL_TZ),
+        nullable=False,
+    )
+    """更新日時"""
+
+    # リレーション
+    chapters: Mapped[list["ChapterModel"]] = relationship("ChapterModel", back_populates="novel")
+    tags: Mapped[list["TagModel"]] = relationship("TagModel", secondary="novel_tags", back_populates="novels")
