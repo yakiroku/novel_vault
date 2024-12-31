@@ -56,6 +56,5 @@ jobs:
           SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
           NOCTURNE_RANKED_URL: ${{ secrets.NOCTURNE_RANKED_URL }}
           NOCTURNE_TAG_SEARCH_URL: ${{ secrets.NOCTURNE_TAG_SEARCH_URL }}
-          NOCTURNE_TAGS: ${{ secrets.NOCTURNE_TAGS }}
         run: |
           python main.py

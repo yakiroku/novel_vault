@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
+from db.db_session_manager import DBSessionManager
 from exceptions.missing_data_exception import MissingDataException
+from repositories.services.search_tag_service import SearchTagService
 from search.novel_search_interface import NovelSearchInterface
 from shared.enums.site import Site
 from shared.schemas.novel_summary import NovelSummary
@@ -13,9 +15,13 @@ class NocturneTagSearch(NovelSearchInterface):
         """複数のタグを繰り返し処理して小説の一覧を取得する"""
         all_novels = []
 
-        for tag in EnvConfigLoader.get_variable("NOCTURNE_TAGS").split(","):
+        with DBSessionManager.session() as session:
+            search_tag_service = SearchTagService(session)
+            search_tag_model_list = search_tag_service.get_all()
+
+        for tag in search_tag_model_list:
             # 各タグに対応するURLを生成
-            url = f"{EnvConfigLoader.get_variable('NOCTURNE_TAG_SEARCH_URL')}{tag.strip()}"
+            url = f"{EnvConfigLoader.get_variable('NOCTURNE_TAG_SEARCH_URL')}{tag.name}"
 
             # クッキーとヘッダーの設定
             cookies = {

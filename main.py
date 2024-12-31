@@ -20,8 +20,10 @@ def main():
     # ノクターンランク検索
     nocturne_ranked_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_RANKED)
     logger.info("ノクターンランク検索を実行中...")
-    # nocturne_ranked_search_list = nocturne_ranked_search.fetch_novel_list()
-    # logger.info(f"ノクターンランク検索で {len(nocturne_ranked_search_list)} 件の小説を取得しました。")
+    nocturne_ranked_search_list = nocturne_ranked_search.fetch_novel_list()
+    logger.info(
+        f"ノクターンランク検索で {len(nocturne_ranked_search_list)} 件の小説を取得しました。"
+    )
 
     # ノクターンタグ検索
     nocturne_tag_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_TAG)
@@ -32,7 +34,7 @@ def main():
     # ノベルリストのアップサート
     with DBSessionManager.auto_commit_session() as session:
         novel_service = NovelService(session)
-        novel_service.upsert_novel_list(nocturne_tag_search_list)
+        novel_service.upsert_novel_list(nocturne_ranked_search_list + nocturne_tag_search_list)
         logger.info("ノベルリストをデータベースにアップサートしました。")
 
     # 小説の詳細を更新し、章を処理
