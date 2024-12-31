@@ -17,25 +17,25 @@ logger = logging.getLogger(__name__)
 def main():
     logger.info("小説の検索を開始します。")
 
-    # # ノクターンランク検索
-    # nocturne_ranked_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_RANKED)
-    # logger.info("ノクターンランク検索を実行中...")
-    # nocturne_ranked_search_list = nocturne_ranked_search.fetch_novel_list()
-    # logger.info(
-    #     f"ノクターンランク検索で {len(nocturne_ranked_search_list)} 件の小説を取得しました。"
-    # )
+    # ノクターンランク検索
+    nocturne_ranked_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_RANKED)
+    logger.info("ノクターンランク検索を実行中...")
+    nocturne_ranked_search_list = nocturne_ranked_search.fetch_novel_list()
+    logger.info(
+        f"ノクターンランク検索で {len(nocturne_ranked_search_list)} 件の小説を取得しました。"
+    )
 
-    # # ノクターンタグ検索
-    # nocturne_tag_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_TAG)
-    # logger.info("ノクターンタグ検索を実行中...")
-    # nocturne_tag_search_list = nocturne_tag_search.fetch_novel_list()
-    # logger.info(f"ノクターンタグ検索で {len(nocturne_tag_search_list)} 件の小説を取得しました。")
+    # ノクターンタグ検索
+    nocturne_tag_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_TAG)
+    logger.info("ノクターンタグ検索を実行中...")
+    nocturne_tag_search_list = nocturne_tag_search.fetch_novel_list()
+    logger.info(f"ノクターンタグ検索で {len(nocturne_tag_search_list)} 件の小説を取得しました。")
 
-    # # ノベルリストのアップサート
-    # with DBSessionManager.auto_commit_session() as session:
-    #     novel_service = NovelService(session)
-    #     novel_service.upsert_novel_list(nocturne_ranked_search_list + nocturne_tag_search_list)
-    #     logger.info("ノベルリストをデータベースにアップサートしました。")
+    # ノベルリストのアップサート
+    with DBSessionManager.auto_commit_session() as session:
+        novel_service = NovelService(session)
+        novel_service.upsert_novel_list(nocturne_ranked_search_list + nocturne_tag_search_list)
+        logger.info("ノベルリストをデータベースにアップサートしました。")
 
     # 小説の詳細を更新し、章を処理
     with DBSessionManager.auto_commit_session() as session:
