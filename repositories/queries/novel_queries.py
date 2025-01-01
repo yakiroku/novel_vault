@@ -50,9 +50,18 @@ class NovelQueries:
         )
 
     def get_novel_list(self) -> list[NovelModel]:
-        return self.session.query(NovelModel).filter(NovelModel.excluded == False).all()
+        return (
+            self.session.query(NovelModel)
+            .filter(NovelModel.excluded == False, NovelModel.deleted == False)
+            .all()
+        )
 
     def exclude_novel(self, novel_id: int) -> None:
         novel = self.session.get(NovelModel, novel_id)
         if novel:
             novel.excluded = True
+
+    def delete_novel(self, novel_id: int) -> None:
+        novel = self.session.get(NovelModel, novel_id)
+        if novel:
+            novel.deleted = True

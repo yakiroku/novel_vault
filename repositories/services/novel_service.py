@@ -58,3 +58,12 @@ class NovelService:
         :param novel_id: 除外する小説のID
         """
         self.query.exclude_novel(novel_id)
+
+    def delete_novel(self, novel_id: int) -> None:
+        """
+        指定された小説を削除する。
+
+        :param session: データベースセッション
+        :param novel_id: 削除する小説のID
+        """
+        self.query.delete_novel(novel_id)

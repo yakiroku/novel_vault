@@ -25,7 +25,7 @@ class NocturneScraper(NovelScraperInterface):
         """
         self.novel = novel
 
-    def fetch_novel_metadata(self) -> NovelMetadata:
+    def fetch_novel_metadata(self) -> NovelMetadata | None:
         """
         小説のメタデータ（タイトル、著者、説明）を取得する
 
@@ -36,6 +36,8 @@ class NocturneScraper(NovelScraperInterface):
             NovelMetadata: 小説のメタデータ
         """
         response = NocturneHelper.request(self.novel.source_url)
+        if response.status_code == 404:
+            return None
         response.raise_for_status()
 
         # BeautifulSoupを使ってHTMLを解析
@@ -76,7 +78,7 @@ class NocturneScraper(NovelScraperInterface):
             last_posted_at=last_posted_at_datetime,
         )
 
-    def fetch_chapter_list(self) -> list[Chapter]:
+    def fetch_chapter_list(self, novel_metadata: NovelMetadata) -> list[Chapter]:
         """
         小説の目次（章タイトルとURL）を取得する
 
@@ -161,12 +163,11 @@ class NocturneScraper(NovelScraperInterface):
                 current_url = None
 
         if len(chapters) == 0:
-            metadata = self.fetch_novel_metadata()
             chapters.append(
                 Chapter(
-                    title=metadata.title,
+                    title=novel_metadata.title,
                     source_url=self.novel.source_url,
-                    posted_at=metadata.last_posted_at,
+                    posted_at=novel_metadata.last_posted_at,
                 )
             )
         return chapters

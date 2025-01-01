@@ -9,7 +9,7 @@ class NovelScraperInterface(ABC):
     """小説サイトのスクレイピングに必要なインターフェース"""
 
     @abstractmethod
-    def fetch_novel_metadata(self) -> NovelMetadata:
+    def fetch_novel_metadata(self) -> NovelMetadata | None:
         """
         小説の基本情報（タイトル、著者、概要など）を取得する
 
@@ -22,7 +22,7 @@ class NovelScraperInterface(ABC):
         pass
 
     @abstractmethod
-    def fetch_chapter_list(self) -> list[Chapter]:
+    def fetch_chapter_list(self, novel_metadata: NovelMetadata) -> list[Chapter]:
         """
         小説の章リストを取得する
 

@@ -35,7 +35,8 @@ class NovelModel(Base):
     )
     """更新日時"""
     excluded: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)  # 除外フラグを追加
-
+    deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    
     # リレーション
     chapters: Mapped[list["ChapterModel"]] = relationship("ChapterModel", back_populates="novel")
     tags: Mapped[list["TagModel"]] = relationship("TagModel", secondary="novel_tags", back_populates="novels")
