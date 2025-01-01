@@ -34,6 +34,7 @@ def main():
     # ノベルリストのアップサート
     with DBSessionManager.auto_commit_session() as session:
         novel_service = NovelService(session)
+        _ = novel_service.get_novel_list()
         novel_service.upsert_novel_list(nocturne_ranked_search_list + nocturne_tag_search_list)
         logger.info("ノベルリストをデータベースにアップサートしました。")
 
@@ -50,7 +51,7 @@ def main():
                 scraper = ScraperFactory.create_scraper(novel)
                 novel_metadata = scraper.fetch_novel_metadata()
                 if novel.last_posted_at >= novel_metadata.last_posted_at:
-                    # logger.info(f"未更新のためスキップします。")
+                    logger.info(f"({novel_index}/{len(novel_list)}) 未更新のためスキップします。")
                     continue
                 novel_service.update(novel.source_url, novel_metadata)
                 logger.info(
