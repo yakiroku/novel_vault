@@ -20,18 +20,30 @@ class NovelService:
             description=novel_metadata.description,
             last_posted_at=novel_metadata.last_posted_at,
         )
-
     def upsert_novel_list(self, novel_list: list[NovelSummary]):
+        # 既存の小説リストを一括取得
+        existing_novels = self.session.query(NovelModel).all()
+
+        # source_url をキーとする辞書を作成（高速な検索のため）
+        existing_novels_map = {novel.source_url: novel for novel in existing_novels}
+
+        # 入力リストを処理
         for novel in novel_list:
-            if not self.query.get_nobel_by_source_url(novel.source_url):
-                self.query.insert(
-                    title=novel.title,
-                    author="",
-                    description="",
-                    last_posted_at=datetime.min,
-                    source_url=novel.source_url,
-                    site=novel.site.value,
-                )
+            # すでに存在している場合はスキップ
+            if novel.source_url in existing_novels_map:
+                continue
+
+            # 存在しない場合は新規挿入
+            novel_model = self.query.insert(
+                title=novel.title,
+                author="",
+                description="",
+                last_posted_at=datetime.min,
+                source_url=novel.source_url,
+                site=novel.site.value,
+            )
+            existing_novels_map.update({novel.source_url: novel_model})
+
 
     def get_novel_list(self) -> list[NovelModel]:
         return self.query.get_novel_list()
