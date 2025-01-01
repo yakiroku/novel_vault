@@ -42,7 +42,9 @@ class NovelService:
                 source_url=novel.source_url,
                 site=novel.site.value,
             )
-            existing_novels_map.update({novel.source_url: novel_model})
+
+            # 新規挿入した小説を辞書に追加
+            existing_novels_map[novel.source_url] = novel_model
 
 
     def get_novel_list(self) -> list[NovelModel]:
