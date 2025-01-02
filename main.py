@@ -53,7 +53,7 @@ def main():
                 logger.info(f"({novel_index}/{len(novel_list)}) 小説 {novel.title} を除外します。")
                 continue
             if novel.last_posted_at >= novel_metadata.last_posted_at:
-                logger.info(f"({novel_index}/{len(novel_list)}) {novel.title}は未更新のためスキップします。")
+                # logger.info(f"({novel_index}/{len(novel_list)}) {novel.title}は未更新のためスキップします。")
                 continue
             novel_service.update(novel.source_url, novel_metadata)
             logger.info(
