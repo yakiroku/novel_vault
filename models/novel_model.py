@@ -3,12 +3,13 @@ from typing import TYPE_CHECKING
 
 from models import Base
 from settings import LOCAL_TZ
-from sqlalchemy import BigInteger, Boolean, DateTime, Integer, Text, UniqueConstraint, Index
+from sqlalchemy import Boolean, DateTime, Integer, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from models.chapter_model import ChapterModel
-    from models.tag_model import TagModel
+    from models.novel_tag_model import NovelTagModel
+
 
 class NovelModel(Base):
     """
@@ -34,18 +35,22 @@ class NovelModel(Base):
         nullable=False,
     )
     """更新日時"""
-    excluded: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)  # 除外フラグを追加
+    excluded: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, index=True
+    )  # 除外フラグを追加
     deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-    
+
     # リレーション
     chapters: Mapped[list["ChapterModel"]] = relationship("ChapterModel", back_populates="novel")
-    tags: Mapped[list["TagModel"]] = relationship("TagModel", secondary="novel_tags", back_populates="novels")
+    novel_tags: Mapped[list["NovelTagModel"]] = relationship(
+        "NovelTagModel", back_populates="novel"
+    )
 
     # 制約の名前を付ける
     __table_args__ = (
         # ユニーク制約の名前を指定
-        UniqueConstraint('source_url', name='uq_novels_source_url'),
+        UniqueConstraint("source_url", name="uq_novels_source_url"),
         # インデックスに名前を指定
-        Index('ix_novels_source_url', 'source_url'),
-        Index('ix_novels_excluded', 'excluded'),
+        Index("ix_novels_source_url", "source_url"),
+        Index("ix_novels_excluded", "excluded"),
     )

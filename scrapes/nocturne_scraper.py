@@ -56,6 +56,17 @@ class NocturneScraper(NovelScraperInterface):
         description_element = soup.select_one(".p-novel__summary")
         description = description_element.text.strip() if description_element else "説明なし"
 
+        #タグを取得
+        # meta タグの content 属性からタグを取得
+        meta_tag = soup.find("meta", attrs={"property": "og:description"})
+        if meta_tag and isinstance(meta_tag, Tag) and "content" in meta_tag.attrs:
+            tag_string = ScrapingHelper.get_first_value(meta_tag["content"])
+            tag_string = tag_string.strip() if tag_string else ""
+            # タグをスペースで区切ってリストを作成し、各タグに対して strip() を適用
+            tags = [tag.strip() for tag in tag_string.split(" ")]
+        else:
+            tags = []  # タグが見つからない場合は空リスト
+
         # 最終更新日時を取得
         last_posted_at_element = soup.find("meta", {"name": "WWWC"})
         if isinstance(last_posted_at_element, Tag):
@@ -75,6 +86,7 @@ class NocturneScraper(NovelScraperInterface):
             title=title,
             author=author,
             description=description,
+            tags=tags,
             last_posted_at=last_posted_at_datetime,
         )
 

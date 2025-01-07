@@ -18,8 +18,10 @@ class NovelService:
             title=novel_metadata.title,
             author=novel_metadata.author,
             description=novel_metadata.description,
+            tags=novel_metadata.tags,
             last_posted_at=novel_metadata.last_posted_at,
         )
+
     def upsert_novel_list(self, novel_list: list[NovelSummary]):
         # 既存の小説リストを一括取得
         existing_novels = self.session.query(NovelModel).all()
@@ -38,6 +40,7 @@ class NovelService:
                 title=novel.title,
                 author="",
                 description="",
+                tags=[],
                 last_posted_at=datetime.min,
                 source_url=novel.source_url,
                 site=novel.site.value,
@@ -46,10 +49,9 @@ class NovelService:
             # 新規挿入した小説を辞書に追加
             existing_novels_map[novel.source_url] = novel_model
 
-
     def get_novel_list(self) -> list[NovelModel]:
         return self.query.get_novel_list()
-    
+
     def exclude_novel(self, novel_id: int) -> None:
         """
         指定された小説を除外する。

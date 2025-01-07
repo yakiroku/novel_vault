@@ -2,18 +2,17 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from models import Base
 from settings import LOCAL_TZ
-from sqlalchemy import BigInteger, DateTime, Integer, Text
+from sqlalchemy import DateTime, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from models.novel_model import NovelModel
+    from models.novel_tag_model import NovelTagModel
 
 
 class TagModel(Base):
     """
     タグを管理するモデル
     """
-    
 
     __tablename__ = "tags"
 
@@ -22,7 +21,5 @@ class TagModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ)
     )
-    # リレーション
-    novels: Mapped[list["NovelModel"]] = relationship(
-        "NovelModel", secondary="novel_tags", back_populates="tags"
-    )
+    # NovelTagModelとのリレーション
+    novel_tags: Mapped[list["NovelTagModel"]] = relationship("NovelTagModel", back_populates="tag")
