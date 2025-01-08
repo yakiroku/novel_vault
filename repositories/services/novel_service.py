@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from models.novel_model import NovelModel
 from repositories.queries.novel_queries import NovelQueries
+from settings import LOCAL_TZ
 from shared.schemas.novel_metadata import NovelMetadata
 from shared.schemas.novel_summary import NovelSummary
 
@@ -41,7 +42,7 @@ class NovelService:
                 author="",
                 description="",
                 tags=[],
-                last_posted_at=datetime.min,
+                last_posted_at=datetime(1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ),
                 source_url=novel.source_url,
                 site=novel.site.value,
             )

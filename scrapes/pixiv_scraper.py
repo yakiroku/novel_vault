@@ -69,12 +69,13 @@ class PixivScraper(NovelScraperInterface):
             last_posted_at_datetime = datetime.strptime(last_posted_at, "%Y/%m/%d %H:%M")
             last_posted_at_datetime = LOCAL_TZ.localize(last_posted_at_datetime)
         except ValueError:
-            last_posted_at_datetime = datetime.min  # フォーマットが合わない場合はNoneにする
+            last_posted_at_datetime = datetime(1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ)  # フォーマットが合わない場合はNoneにする
 
         return NovelMetadata(
             title=title,
             author=author,
             description=description,
+            tags=[],
             last_posted_at=last_posted_at_datetime,
         )
 
@@ -145,7 +146,7 @@ class PixivScraper(NovelScraperInterface):
                         Chapter(
                             title=title,
                             source_url="https://novel18.syosetu.com" + url,
-                            posted_at=posted_at if posted_at else datetime.min,
+                            posted_at=posted_at if posted_at else datetime(1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ),
                         )
                     )
 
