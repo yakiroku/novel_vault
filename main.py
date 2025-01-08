@@ -94,7 +94,7 @@ def main():
                 if excluded_flg == True:
                     continue
 
-            if novel.last_posted_at.replace(tzinfo=LOCAL_TZ) >= novel_metadata.last_posted_at:
+            if novel.last_posted_at.astimezone(LOCAL_TZ) >= novel_metadata.last_posted_at:
                 # logger.info(f"({novel_index}/{len(novel_list)}) {novel.title}は未更新のためスキップします。")
                 continue
             novel_service.update(novel.source_url, novel_metadata)
@@ -122,7 +122,7 @@ def main():
                 )
                 if (
                     chapter_model
-                    and chapter_model.posted_at.replace(tzinfo=LOCAL_TZ) >= chapter.posted_at
+                    and chapter_model.posted_at.astimezone(LOCAL_TZ) >= chapter.posted_at
                 ):
                     # logger.info(f"未更新のためスキップします。")
                     continue
