@@ -29,3 +29,6 @@ class ChapterService:
 
     def get_chapter_by_source_url(self, source_url: str) -> ChapterModel | None:
         return self.query.get_chapter_by_source_url(source_url)
+
+    def get_by_id(self, id: int) -> ChapterModel | None:
+        return self.session.query(ChapterModel).filter(ChapterModel.id == id).one_or_none()

@@ -12,12 +12,13 @@ class DBSessionManager:
     @staticmethod
     def create_url() -> str:
         """データベース接続用のURLを作成するメソッド"""
-        db_user = EnvConfigLoader.get_variable("SUPABASE_DB_USER")
-        db_pass = EnvConfigLoader.get_variable("SUPABASE_DB_PASS")
-        db_host = EnvConfigLoader.get_variable("SUPABASE_DB_HOST")
-        db_name = EnvConfigLoader.get_variable("SUPABASE_DB_NAME")
-        url = f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}/{db_name}"
-
+        db_user = EnvConfigLoader.get_variable("TIDB_DB_USER")
+        db_pass = EnvConfigLoader.get_variable("TIDB_DB_PASS")
+        db_host = EnvConfigLoader.get_variable("TIDB_DB_HOST")
+        db_port = EnvConfigLoader.get_variable("TIDB_DB_PORT")
+        db_name = EnvConfigLoader.get_variable("TIDB_DB_NAME")
+        db_ca = EnvConfigLoader.get_variable("TIDB_DB_CA")
+        url = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}?ssl_ca={db_ca}&ssl_verify_cert=true&ssl_verify_identity=true"
         return url
 
     # エンジンの作成

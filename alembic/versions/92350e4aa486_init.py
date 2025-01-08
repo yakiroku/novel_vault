@@ -1,18 +1,18 @@
 """init
 
-Revision ID: 610609750797
+Revision ID: 92350e4aa486
 Revises: 
-Create Date: 2024-12-31 17:37:15.806308
+Create Date: 2025-01-08 16:25:10.068741
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision: str = '610609750797'
+revision: str = '92350e4aa486'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,26 +26,28 @@ def upgrade() -> None:
     sa.Column('author', sa.Text(), nullable=False),
     sa.Column('description', sa.Text(), nullable=False),
     sa.Column('site', sa.Text(), nullable=False),
-    sa.Column('source_url', sa.Text(), nullable=False),
+    sa.Column('source_url', sa.String(length=255), nullable=False),
     sa.Column('last_posted_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('excluded', sa.Boolean(), nullable=False),
+    sa.Column('deleted', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('source_url', name='uq_novels_source_url')
     )
+    op.create_index(op.f('ix_novels_deleted'), 'novels', ['deleted'], unique=False)
     op.create_index('ix_novels_excluded', 'novels', ['excluded'], unique=False)
     op.create_index(op.f('ix_novels_source_url'), 'novels', ['source_url'], unique=True)
     op.create_table('search_tags',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.Text(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name', name='uq_search_tags_name')
     )
     op.create_table('tags',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.Text(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
@@ -54,8 +56,8 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('novel_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.Text(), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
-    sa.Column('source_url', sa.Text(), nullable=False),
+    sa.Column('content', mysql.LONGTEXT(), nullable=False),
+    sa.Column('source_url', sa.String(length=255), nullable=False),
     sa.Column('posted_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
@@ -63,7 +65,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('source_url', name='uq_chapters_source_url')
     )
-    op.create_index('content_search_idx', 'chapters', ['content'], unique=False, postgresql_using='pgroonga')
     op.create_index('ix_chapters_novel_id', 'chapters', ['novel_id'], unique=False)
     op.create_index('ix_chapters_posted_at', 'chapters', ['posted_at'], unique=False)
     op.create_table('novel_tags',
@@ -89,7 +90,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('chapter_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.Text(), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('content', mysql.LONGTEXT(), nullable=False),
     sa.Column('posted_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['chapter_id'], ['chapters.id'], ),
@@ -109,11 +110,11 @@ def downgrade() -> None:
     op.drop_table('novel_tags')
     op.drop_index('ix_chapters_posted_at', table_name='chapters')
     op.drop_index('ix_chapters_novel_id', table_name='chapters')
-    op.drop_index('content_search_idx', table_name='chapters', postgresql_using='pgroonga')
     op.drop_table('chapters')
     op.drop_table('tags')
     op.drop_table('search_tags')
     op.drop_index(op.f('ix_novels_source_url'), table_name='novels')
     op.drop_index('ix_novels_excluded', table_name='novels')
+    op.drop_index(op.f('ix_novels_deleted'), table_name='novels')
     op.drop_table('novels')
     # ### end Alembic commands ###

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from models import Base
 from settings import LOCAL_TZ
-from sqlalchemy import Boolean, DateTime, Integer, Text, UniqueConstraint, Index
+from sqlalchemy import Boolean, DateTime, Integer, String, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ class NovelModel(Base):
     author: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     site: Mapped[str] = mapped_column(Text, nullable=False)
-    source_url: Mapped[str] = mapped_column(Text, unique=True, nullable=False, index=True)
+    source_url: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     last_posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False

@@ -50,10 +50,12 @@ jobs:
 
       - name: Run script
         env:
-          SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
-          SUPABASE_DB_PASS: ${{ secrets.SUPABASE_DB_PASS }}
-          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
-          SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
+          TIDB_DB_USER: ${{ secrets.TIDB_DB_USER }}
+          TIDB_DB_PASS: ${{ secrets.TIDB_DB_PASS }}
+          TIDB_DB_HOST: ${{ secrets.TIDB_DB_HOST }}
+          TIDB_DB_NAME: ${{ secrets.TIDB_DB_NAME }}
+          TIDB_DB_PORT: ${{ secrets.TIDB_DB_PORT }}
+          TIDB_DB_CA: ${{ secrets.TIDB_DB_CA }}
           NOCTURNE_DAILY_RANKED_URL: ${{ secrets.NOCTURNE_DAILY_RANKED_URL }}
           NOCTURNE_WEEKLY_RANKED_URL: ${{ secrets.NOCTURNE_WEEKLY_RANKED_URL }}
           NOCTURNE_MONTHLY_RANKED_URL: ${{ secrets.NOCTURNE_MONTHLY_RANKED_URL }}

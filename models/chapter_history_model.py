@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from sqlalchemy.dialects.mysql import LONGTEXT
 from models import Base
 from settings import LOCAL_TZ
 
@@ -21,7 +21,7 @@ class ChapterHistoryModel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     chapter_id: Mapped[int] = mapped_column(Integer, ForeignKey("chapters.id"), nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[str] = mapped_column(LONGTEXT, nullable=False)
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False
@@ -33,6 +33,6 @@ class ChapterHistoryModel(Base):
     # 制約の名前を付ける
     __table_args__ = (
         # インデックスに名前を指定
-        Index('ix_chapter_histories_chapter_id', 'chapter_id'),
-        Index('ix_chapter_histories_posted_at', 'posted_at'),
+        Index("ix_chapter_histories_chapter_id", "chapter_id"),
+        Index("ix_chapter_histories_posted_at", "posted_at"),
     )

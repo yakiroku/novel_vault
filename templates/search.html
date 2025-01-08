@@ -29,10 +29,12 @@
             {% for result in results %}
                 <li>
                     <h3>{{ result.title }}</h3>
-                    <p></p>著者: {{ result.author }}</p>
+                    <p>{{ result.tags }}</p>
+                    <p>著者: {{ result.author }}</p>
                     <h3><a href="{{ result.source_url }}" target="_blank">{{ result.chapter }}</a></h3>
                     <p>{{ result.summary }}</p>
                     <p>投稿日: {{ result.posted_at }}</p>
+                    <p><a href="/chapter/{{ result.id }}">章の詳細を見る</a></p>
                     <!-- 除外ボタン -->
                     <form action="/exclude" method="post">
                         <input type="hidden" name="novel_id" value="{{ result.novel_id }}">

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ chapter.title }}</title>
+</head>
+<body>
+    <h1>{{ chapter.title }}</h1>
+    <p><strong>投稿日時:</strong> {{ chapter.posted_at }}</p>
+    <p><strong>ソースURL:</strong> <a href="{{ chapter.source_url }}" target="_blank">{{ chapter.source_url }}</a></p>
+    <div>
+        <h2>コンテンツ</h2>
+        <pre>{{ chapter.content }}</pre>
+    </div>
+</body>
+</html>

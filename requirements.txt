@@ -1,4 +1,4 @@
-psycopg2-binary
+pymysql
 python-dotenv
 Alembic
 SQLAlchemy
@@ -7,4 +7,3 @@ requests
 pydantic
 beautifulsoup4
 flask
-playwright

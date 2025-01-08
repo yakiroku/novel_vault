@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Text, UniqueConstraint, Index
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import TSVECTOR
-
+from sqlalchemy.dialects.mysql import LONGTEXT
 from models import Base
 from settings import LOCAL_TZ
 
@@ -25,8 +24,8 @@ class ChapterModel(Base):
         Integer, ForeignKey("novels.id"), nullable=False, index=True
     )
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
-    source_url: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[str] = mapped_column(LONGTEXT, nullable=False)
+    source_url: Mapped[str] = mapped_column(String(255), nullable=False)
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False
@@ -52,5 +51,4 @@ class ChapterModel(Base):
         # インデックスの名前指定
         Index("ix_chapters_novel_id", "novel_id"),
         Index("ix_chapters_posted_at", "posted_at"),
-        Index("content_search_idx", "content", postgresql_using="pgroonga"),
     )

@@ -17,7 +17,7 @@ class NovelQueries:
         tags: list[str],
         description: str,
         last_posted_at: datetime,
-    ):
+    ) -> NovelModel | None:
         novel = self.get_nobel_by_source_url(source_url)
         if novel:
             # タグを同期
@@ -26,6 +26,8 @@ class NovelQueries:
             novel.author = author
             novel.description = description
             novel.last_posted_at = last_posted_at
+
+        return novel
 
     def insert(
         self,

@@ -1,7 +1,7 @@
 from datetime import datetime
 from models import Base
 from settings import LOCAL_TZ
-from sqlalchemy import DateTime, Integer, Text, UniqueConstraint
+from sqlalchemy import DateTime, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 class SearchTagModel(Base):
@@ -12,7 +12,7 @@ class SearchTagModel(Base):
     __tablename__ = "search_tags"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ)
     )

@@ -12,8 +12,8 @@ class NovelService:
         self.session = session
         self.query = NovelQueries(session)
 
-    def update(self, source_url: str, novel_metadata: NovelMetadata):
-        self.query.update(
+    def update(self, source_url: str, novel_metadata: NovelMetadata) -> NovelModel | None:
+        return self.query.update(
             source_url=source_url,
             title=novel_metadata.title,
             author=novel_metadata.author,
