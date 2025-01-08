@@ -94,7 +94,7 @@ def main():
                     ),
                     None,
                 )
-                if chapter_model and chapter_model.posted_at >= chapter.posted_at:
+                if chapter_model and chapter_model.posted_at.replace(tzinfo=LOCAL_TZ) >= chapter.posted_at:
                     # logger.info(f"未更新のためスキップします。")
                     continue
                 chapter_content = scraper.fetch_chapter_content(chapter.source_url)
