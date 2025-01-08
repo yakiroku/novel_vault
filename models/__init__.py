@@ -12,3 +12,4 @@ from models.novel_tag_model import NovelTagModel
 from models.scrape_log_model import ScrapeLogModel
 from models.tag_model import TagModel
 from models.search_tag_model import SearchTagModel
+from models.excluded_tag_model import ExcludedTagModel

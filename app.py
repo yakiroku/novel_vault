@@ -43,7 +43,9 @@ def search():
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
-            # pgroongaを使用した全文検索
+            # LIKE検索用のキーワードを修正
+            search_keyword = "%" + keyword + "%"  # 文字列の前後に%を追加
+
             stmt = (
                 select(
                     ChapterModel,
@@ -55,7 +57,7 @@ def search():
                 .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)  # TagModelと結合
                 .where(
                     and_(
-                        text("chapters.content @@ :keyword"),  # pgroonga全文検索条件
+                        ChapterModel.content.like(search_keyword),  # pgroonga全文検索条件
                         NovelModel.excluded == False,  # 除外されていない条件
                     )
                 )
@@ -63,7 +65,7 @@ def search():
             )
 
             # クエリ実行
-            results = session.execute(stmt, {"keyword": keyword}).all()
+            results = session.execute(stmt).all()
 
             # データをグループ化してタグをまとめる
             grouped_results = {}

@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 from db.db_session_manager import DBSessionManager
 from repositories.services.chapter_service import ChapterService
+from repositories.services.excluded_tag_service import ExcludedTagService
 from repositories.services.novel_service import NovelService
 from scrapes.scraper_factory import ScraperFactory
 from search.novel_search_factory import NovelSearchFactory
@@ -31,10 +32,14 @@ def main():
     logger.info(f"ノクターンタグ検索で {len(nocturne_tag_search_list)} 件の小説を取得しました。")
 
     # ノクターンWEEKタグ検索
-    nocturne_weekly_tag_search = NovelSearchFactory.create_searcher(SearchTarget.NOCTURNE_WEEKLY_TAG)
+    nocturne_weekly_tag_search = NovelSearchFactory.create_searcher(
+        SearchTarget.NOCTURNE_WEEKLY_TAG
+    )
     logger.info("ノクターンタグWEEK検索を実行中...")
     nocturne_weekly_tag_search_list = nocturne_weekly_tag_search.fetch_novel_list()
-    logger.info(f"ノクターンタグWEEK検索で {len(nocturne_weekly_tag_search_list)} 件の小説を取得しました。")
+    logger.info(
+        f"ノクターンタグWEEK検索で {len(nocturne_weekly_tag_search_list)} 件の小説を取得しました。"
+    )
 
     # PIXIVタグ検索
     # pixiv_tag_search = NovelSearchFactory.create_searcher(SearchTarget.PIXIV_TAG)
@@ -58,8 +63,11 @@ def main():
     with DBSessionManager.auto_commit_session() as session:
         novel_service = NovelService(session)
         chapter_service = ChapterService(session)
+        excluded_tag_service = ExcludedTagService(session)
         novel_list = novel_service.get_novel_list()
         logger.info(f"{len(novel_list)} 件の小説がデータベースにあります。")
+
+        excluded_tags = excluded_tag_service.get_all()
 
         for novel_index, novel in enumerate(novel_list, start=1):
             scraper = ScraperFactory.create_scraper(novel)
@@ -68,6 +76,24 @@ def main():
                 novel_service.delete_novel(novel.id)
                 logger.info(f"({novel_index}/{len(novel_list)}) 小説 {novel.title} を除外します。")
                 continue
+            if excluded_tags is not None:
+                excluded_flg = False
+                for excluded_tag in excluded_tags:
+                    # excluded_tag.nameがnovel_metadata.tagsのどれかに部分一致する場合
+                    for tag in novel_metadata.tags:
+                        if excluded_tag.name in tag:
+                            # 部分一致した場合にログを出力
+                            novel_service.exclude_novel(novel.id)
+                            logger.info(
+                                f"({novel_index}/{len(novel_list)}) 小説 {novel.title} のタグ '{tag}' が除外タグ '{excluded_tag.name}' と部分一致しました。"
+                            )
+                            # 小説の処理をスキップして次の小説に進む
+                            excluded_flg = True
+                            break
+
+                if excluded_flg == True:
+                    continue
+
             if novel.last_posted_at.replace(tzinfo=LOCAL_TZ) >= novel_metadata.last_posted_at:
                 # logger.info(f"({novel_index}/{len(novel_list)}) {novel.title}は未更新のためスキップします。")
                 continue
@@ -94,7 +120,10 @@ def main():
                     ),
                     None,
                 )
-                if chapter_model and chapter_model.posted_at.replace(tzinfo=LOCAL_TZ) >= chapter.posted_at:
+                if (
+                    chapter_model
+                    and chapter_model.posted_at.replace(tzinfo=LOCAL_TZ) >= chapter.posted_at
+                ):
                     # logger.info(f"未更新のためスキップします。")
                     continue
                 chapter_content = scraper.fetch_chapter_content(chapter.source_url)
