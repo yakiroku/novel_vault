@@ -1,11 +1,9 @@
-import os
 import logging
 from dotenv import load_dotenv
 
 from db.db_session_manager import DBSessionManager
 from repositories.services.chapter_service import ChapterService
 from repositories.services.novel_service import NovelService
-from scrapes.pdf_scraper import PdfScraper
 from scrapes.scraper_factory import ScraperFactory
 from search.novel_search_factory import NovelSearchFactory
 from settings import LOCAL_TZ
@@ -118,7 +116,3 @@ if __name__ == "__main__":
 
     logger.info("処理を開始します。")
     main()
-    # pdf = PdfScraper()
-    # # pdf.fetch_chapter_content(is_vertical=True)
-    # text = pdf.process_images_to_chapters('/Users/test/Documents/novel/小説データ/主導/本文/skebのコピー/')
-    # print(text)
