@@ -13,3 +13,4 @@ from models.scrape_log_model import ScrapeLogModel
 from models.tag_model import TagModel
 from models.search_tag_model import SearchTagModel
 from models.excluded_tag_model import ExcludedTagModel
+from models.paragraph_model import ParagraphModel

@@ -32,7 +32,15 @@
                     <p>{{ result.tags }}</p>
                     <p>著者: {{ result.author }}</p>
                     <h3><a href="{{ result.source_url }}" target="_blank">{{ result.chapter }}</a></h3>
-                    <p>{{ result.summary }}</p>
+                    <!-- Paragraphs -->
+                    <ul>
+                        {% for paragraph in result.paragraphs %}
+                            <li>
+                                <p>{{ paragraph.content }}</p> <!-- 概要表示（200文字に切り取る） -->
+                                <p>{{ paragraph.distance }}</p> <!-- 概要表示（200文字に切り取る） -->
+                            </li>
+                        {% endfor %}
+                    </ul>
                     <p>投稿日: {{ result.posted_at }}</p>
                     <p><a href="/chapter/{{ result.id }}">章の詳細を見る</a></p>
                     <!-- 除外ボタン -->

@@ -1,4 +1,5 @@
 pymysql
+tidb-vector
 python-dotenv
 Alembic
 SQLAlchemy
@@ -7,3 +8,5 @@ requests
 pydantic
 beautifulsoup4
 flask
+sentence-transformers
+langchain

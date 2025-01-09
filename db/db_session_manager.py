@@ -45,3 +45,8 @@ class DBSessionManager:
             raise
         finally:
             session.close()
+
+    @staticmethod
+    def engine():
+        """エンジンを取得するメソッド"""
+        return DBSessionManager._engine

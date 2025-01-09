@@ -8,9 +8,11 @@ from db.db_session_manager import DBSessionManager
 from models import ChapterModel
 from models.novel_model import NovelModel
 from models.novel_tag_model import NovelTagModel
+from models.paragraph_model import ParagraphModel
 from models.tag_model import TagModel
 from repositories.services.chapter_service import ChapterService
-from repositories.services.novel_service import NovelService  # モデルのインポート
+from repositories.services.novel_service import NovelService
+from util.sentence_transformer_singleton import SentenceTransformerSingleton  # モデルのインポート
 
 # Flask アプリケーションの初期化
 app = Flask(__name__)
@@ -43,41 +45,73 @@ def search():
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
-            # LIKE検索用のキーワードを修正
-            search_keyword = "%" + keyword + "%"  # 文字列の前後に%を追加
-
+            model = SentenceTransformerSingleton.get_model()
+            embedding = model.encode(keyword).tolist()
+            distance = ParagraphModel.embedding.cosine_distance(embedding).label('distance')
             stmt = (
                 select(
                     ChapterModel,
+                    ParagraphModel,
                     NovelModel,
-                    TagModel.name.label("tag_name")  # タグ名を取得
+                    distance
                 )
                 .join(NovelModel, NovelModel.id == ChapterModel.novel_id)  # ChapterModelとNovelModelを結合
-                .outerjoin(NovelTagModel, NovelTagModel.novel_id == NovelModel.id)  # 中間テーブルを結合
-                .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)  # TagModelと結合
-                .where(
+                .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)  # ParagraphModelを結合
+                .filter(
                     and_(
-                        ChapterModel.content.like(search_keyword),  # pgroonga全文検索条件
-                        NovelModel.excluded == False,  # 除外されていない条件
+                        NovelModel.excluded == False,  # NovelModelのexcludedがFalseであること
+                        distance < 0.45,  # ParagraphModelのdistanceが0.5より小さいこと
                     )
                 )
                 .order_by(order_by)  # 並び順を設定
             )
 
-            # クエリ実行
+            # メインクエリ実行
             results = session.execute(stmt).all()
+
+            # メインクエリからNovelModelのIDを抽出
+            novel_ids = {novel.id for _, _, novel, _ in results}
+
+            # タグを取得するクエリ
+            tag_stmt = (
+                select(
+                    NovelTagModel.novel_id,
+                    TagModel.name.label("tag_name")
+                )
+                .join(TagModel, TagModel.id == NovelTagModel.tag_id)  # TagModelと結合
+                .filter(NovelTagModel.novel_id.in_(novel_ids))  # novel_idsに基づいて絞り込み
+            )
+
+            # タグを取得
+            tags_results = session.execute(tag_stmt).fetchall()
+
+            # タグをnovel_idごとにまとめる
+            tags_by_novel = {}
+            for novel_id, tag_name in tags_results:
+                if novel_id not in tags_by_novel:
+                    tags_by_novel[novel_id] = set()
+                tags_by_novel[novel_id].add(tag_name)
 
             # データをグループ化してタグをまとめる
             grouped_results = {}
-            for chapter, novel, tag_name in results:
+            for chapter, paragraph, novel, dis in results:
                 if chapter.id not in grouped_results:
                     grouped_results[chapter.id] = {
                         "chapter": chapter,
                         "novel": novel,
                         "tags": set(),
+                        "paragraphs": [],
                     }
-                if tag_name:
-                    grouped_results[chapter.id]["tags"].add(tag_name)
+                
+                # paragraphをchapterごとに追加
+                grouped_results[chapter.id]["paragraphs"].append({
+                    "content": paragraph.content,
+                    "distance": dis  # distanceも一緒に保存
+                })
+                
+                # タグを追加
+                if novel.id in tags_by_novel:
+                    grouped_results[chapter.id]["tags"].update(tags_by_novel[novel.id])
 
             # ページング処理
             total_results = len(grouped_results)
@@ -88,16 +122,10 @@ def search():
 
             # 検索結果の整形
             for result in paginated_results:
+                paragraphs = result["paragraphs"]
                 chapter = result["chapter"]
                 novel = result["novel"]
                 tags = ", ".join(result["tags"])  # タグを文字列に結合
-
-                # キーワードの前後 200 文字を抜き出して概要を作成
-                content = chapter.content
-                idx = content.lower().find(keyword.lower())
-                summary_start = max(idx - 30, 0)
-                summary_end = min(idx + len(keyword) + 300, len(content))
-                summary = content[summary_start:summary_end].replace("\n", " ").strip()
 
                 # 整形されたデータをリストに追加
                 search_results.append({
@@ -106,12 +134,13 @@ def search():
                     "author": novel.author,
                     "tags": tags,
                     "chapter": chapter.title,
-                    "summary": summary,
+                    "paragraphs": paragraphs,
                     "source_url": chapter.source_url,
                     "id": chapter.id,
                     "posted_at": chapter.posted_at.strftime("%Y-%m-%d %H:%M"),
                 })
 
+    # 検索結果を表示
     return render_template(
         "search.html",
         results=search_results,
