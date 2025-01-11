@@ -20,10 +20,10 @@ class ChapterQueries:
         content: str,
         source_url: str,
         posted_at: datetime,
-    ):  
-        
+    ):
+
         paragragh_service = ParagraphService(session=self.session)
-    
+
         chapter = self.get_chapter_by_source_url(source_url)
         if chapter:
             history = ChapterHistoryModel(
@@ -52,45 +52,27 @@ class ChapterQueries:
             self.session.flush()
 
         # 章のテキストを50文字ごとに分割してParagraphModelに格納
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=0)
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=500, chunk_overlap=0, separators=["。", "、", "．", "！", "？", "・"]
+        )
         paragraphs = text_splitter.split_text(content)
-        model = SentenceTransformerSingleton.get_model()
-        embeddings = model.encode(paragraphs, show_progress_bar=False).tolist()
-        paragragh_service.batch_insert(chapter_id=chapter.id, contents=paragraphs, embeddings=embeddings)
-            
+        # model = SentenceTransformerSingleton.get_model()
+        # embeddings = model.encode(paragraphs, show_progress_bar=False).tolist()
+        # paragragh_service.batch_insert(
+        #     chapter_id=chapter.id, contents=paragraphs, embeddings=embeddings
+        # )
+        paragragh_service.batch_insert(
+            chapter_id=chapter.id, contents=paragraphs
+        )
+
         return chapter
 
     def get_novel_by_id(self, novel_id: int) -> list[ChapterModel] | None:
         return self.session.query(ChapterModel).filter(ChapterModel.novel_id == novel_id).all()
 
-    def get_chapter_by_source_url(self, source_url
-                                  : str) -> ChapterModel | None:
+    def get_chapter_by_source_url(self, source_url: str) -> ChapterModel | None:
         return (
             self.session.query(ChapterModel)
             .filter(ChapterModel.source_url == source_url)
             .one_or_none()
         )
-
-
-    def _split_into_paragraphs(self, text: str, max_length: int = 500) -> list[str]:
-        """
-        入力されたテキストを500文字ごとに分割しますが、句読点で自然に分割します。
-        """
-        sentences = re.split(r'([。．！？])', text)  # 句読点で分割
-        paragraphs = []
-        current_paragraph = ""
-
-        for sentence in sentences:
-            if len(current_paragraph) + len(sentence) > max_length:
-                # 500文字を超える場合、現在の段落を追加して新しい段落を開始
-                if current_paragraph:
-                    paragraphs.append(current_paragraph.strip())
-                current_paragraph = sentence
-            else:
-                current_paragraph += sentence
-
-        # 最後の段落が残っている場合
-        if current_paragraph:
-            paragraphs.append(current_paragraph.strip())
-
-        return paragraphs

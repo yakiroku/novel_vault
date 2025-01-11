@@ -23,7 +23,7 @@ class ParagraphModel(Base):
         Integer, ForeignKey("chapters.id"), nullable=False, index=True
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[list[float]] = mapped_column(VectorType(dim=768))  # ベクトルを格納するカラム
+    # embedding: Mapped[list[float]] = mapped_column(VectorType(dim=768))  # ベクトルを格納するカラム
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False
     )

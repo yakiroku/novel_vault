@@ -45,24 +45,26 @@ def search():
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
-            model = SentenceTransformerSingleton.get_model()
-            embedding = model.encode(keyword).tolist()
-            distance = ParagraphModel.embedding.cosine_distance(embedding).label('distance')
+            # model = SentenceTransformerSingleton.get_model()
+            # embedding = model.encode(keyword).tolist()
+            # distance = ParagraphModel.embedding.cosine_distance(embedding).label('distance')
             stmt = (
                 select(
                     ChapterModel,
                     ParagraphModel,
                     NovelModel,
-                    distance
+                    # distance
                 )
                 .join(NovelModel, NovelModel.id == ChapterModel.novel_id)  # ChapterModelとNovelModelを結合
                 .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)  # ParagraphModelを結合
                 .filter(
                     and_(
                         NovelModel.excluded == False,  # NovelModelのexcludedがFalseであること
-                        distance < 0.45,  # ParagraphModelのdistanceが0.5より小さいこと
+                        # distance < 0.4,  # ParagraphModelのdistanceが0.5より小さいこと
+                        ParagraphModel.content.like(f"%{keyword}%")
                     )
                 )
+                # .order_by(asc(distance))  # 並び順を設定
                 .order_by(order_by)  # 並び順を設定
             )
 
@@ -70,7 +72,7 @@ def search():
             results = session.execute(stmt).all()
 
             # メインクエリからNovelModelのIDを抽出
-            novel_ids = {novel.id for _, _, novel, _ in results}
+            novel_ids = {novel.id for _, _, novel in results}
 
             # タグを取得するクエリ
             tag_stmt = (
@@ -94,7 +96,7 @@ def search():
 
             # データをグループ化してタグをまとめる
             grouped_results = {}
-            for chapter, paragraph, novel, dis in results:
+            for chapter, paragraph, novel in results:
                 if chapter.id not in grouped_results:
                     grouped_results[chapter.id] = {
                         "chapter": chapter,
@@ -106,7 +108,7 @@ def search():
                 # paragraphをchapterごとに追加
                 grouped_results[chapter.id]["paragraphs"].append({
                     "content": paragraph.content,
-                    "distance": dis  # distanceも一緒に保存
+                    # "distance": dis  # distanceも一緒に保存
                 })
                 
                 # タグを追加

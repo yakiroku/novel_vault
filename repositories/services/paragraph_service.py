@@ -24,16 +24,16 @@ class ParagraphService:
         
         if chapter:
             # 段落の内容を取得
-            paragraphs = self.session.query(ParagraphModel).filter_by(chapter_id=chapter.id).all()
+            paragraphs = self.session.query(ParagraphModel).filter_by(chapter_id=chapter.id).order_by(ParagraphModel.id.asc()).all()
             # 段落を改行を挟んで結合して元の文章に戻す
             full_content = "\n\n".join(paragraph.content for paragraph in paragraphs)
             return full_content
         
         return ""        
 
-    def insert(self, chapter_id: int, content: str) -> ParagraphModel:
-        return self.query.insert(chapter_id=chapter_id, content=content)
+    # def insert(self, chapter_id: int, content: str) -> ParagraphModel:
+    #     return self.query.insert(chapter_id=chapter_id, content=content)
 
 
-    def batch_insert(self, chapter_id: int, contents: list[str], embeddings: list[list[float]]):
-        return self.query.batch_insert(chapter_id=chapter_id, contents=contents, embeddings=embeddings)
+    def batch_insert(self, chapter_id: int, contents: list[str]):
+        return self.query.batch_insert(chapter_id=chapter_id, contents=contents)

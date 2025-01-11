@@ -17,30 +17,30 @@ class ParagraphQueries:
 
     def chapter_content(self, chapter_id: int) -> list[ParagraphModel]:
         return (
-            self.session.query(ParagraphModel).filter(ParagraphModel.chapter_id == chapter_id).all()
+            self.session.query(ParagraphModel).filter(ParagraphModel.chapter_id == chapter_id).order_by(ParagraphModel.id.asc()).all()
         )
 
-    def insert(self, chapter_id: int, content: str) -> ParagraphModel:
-        # 各段落をベクトル化して保存
+    # def insert(self, chapter_id: int, content: str) -> ParagraphModel:
+    #     # 各段落をベクトル化して保存
 
-        model = SentenceTransformerSingleton.get_model()
-        embedding = model.encode(content, show_progress_bar=False).tolist()  # 段落のベクトル化
-        paragraph_model = ParagraphModel(
-            chapter_id=chapter_id,
-            content=content,
-            embedding=embedding,
-        )
-        self.session.add(paragraph_model)
-        self.session.flush()
-        return paragraph_model
+    #     model = SentenceTransformerSingleton.get_model()
+    #     embedding = model.encode(content, show_progress_bar=False).tolist()  # 段落のベクトル化
+    #     paragraph_model = ParagraphModel(
+    #         chapter_id=chapter_id,
+    #         content=content,
+    #         embedding=embedding,
+    #     )
+    #     self.session.add(paragraph_model)
+    #     self.session.flush()
+    #     return paragraph_model
 
-    def batch_insert(self, chapter_id: int, contents: list[str], embeddings: list[list[float]]):
+    def batch_insert(self, chapter_id: int, contents: list[str]):
         paragraph_models = []
 
         # 各段落とその埋め込みベクトルを組み合わせてモデルインスタンスを作成
-        for content, embedding in zip(contents, embeddings):
+        for content in contents:
             paragraph_model = ParagraphModel(
-                chapter_id=chapter_id, content=content, embedding=embedding
+                chapter_id=chapter_id, content=content
             )
             paragraph_models.append(paragraph_model)
 
