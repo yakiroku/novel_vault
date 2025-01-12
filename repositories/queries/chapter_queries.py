@@ -1,12 +1,10 @@
 from datetime import datetime
 import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 from models.chapter_history_model import ChapterHistoryModel
 from models.chapter_model import ChapterModel
 from repositories.services.paragraph_service import ParagraphService
-from util.sentence_transformer_singleton import SentenceTransformerSingleton
 
 
 class ChapterQueries:

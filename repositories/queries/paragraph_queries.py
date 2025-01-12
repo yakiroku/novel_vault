@@ -1,7 +1,5 @@
-from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 from models.paragraph_model import ParagraphModel
-from util.sentence_transformer_singleton import SentenceTransformerSingleton
 
 
 class ParagraphQueries:

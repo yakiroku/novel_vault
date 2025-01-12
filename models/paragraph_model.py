@@ -5,7 +5,6 @@ from sqlalchemy import DateTime, ForeignKey, Integer, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models import Base
 from settings import LOCAL_TZ
-from tidb_vector.sqlalchemy import VectorType
 
 if TYPE_CHECKING:
     from models.chapter_model import ChapterModel

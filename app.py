@@ -1,8 +1,6 @@
-import logging
 import re
-from flask import Flask, abort, redirect, request, render_template
-from sqlalchemy import and_, create_engine, select, text, desc, asc
-from sqlalchemy.orm import sessionmaker, scoped_session
+from flask import Flask, redirect, request, render_template
+from sqlalchemy import and_, select, desc, asc
 from math import ceil
 from db.db_session_manager import DBSessionManager
 from models import ChapterModel
@@ -12,7 +10,6 @@ from models.paragraph_model import ParagraphModel
 from models.tag_model import TagModel
 from repositories.services.chapter_service import ChapterService
 from repositories.services.novel_service import NovelService
-from util.sentence_transformer_singleton import SentenceTransformerSingleton  # モデルのインポート
 
 # Flask アプリケーションの初期化
 app = Flask(__name__)
