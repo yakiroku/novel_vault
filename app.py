@@ -125,9 +125,18 @@ def search():
             # 検索結果の整形
             for result in paginated_results:
                 paragraphs = result["paragraphs"]
+                # app.logger.info(paragraphs)
                 chapter = result["chapter"]
                 novel = result["novel"]
                 tags = ", ".join(result["tags"])  # タグを文字列に結合
+
+                # キーワードの前後 200 文字を抜き出して概要を作成
+                for paragraph in paragraphs:
+                    content = paragraph["content"]
+                    idx = content.lower().find(keyword.lower())
+                    summary_start = max(idx - 30, 0)
+                    summary_end = min(idx + len(keyword) + 200, len(content))
+                    paragraph["content"] = content[summary_start:summary_end].replace("\n", " ").strip()
 
                 # 整形されたデータをリストに追加
                 search_results.append({

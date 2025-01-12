@@ -3,7 +3,7 @@ on:
   push:
   workflow_dispatch:
   schedule:
-    - cron: "0 7 * * *"  # UTCで午前7時に実行 (日本時間で午前4時)
+    - cron: "0 19 * * *"  # UTCで午前7時に実行 (日本時間で午前4時)
 
 jobs:
   build:
