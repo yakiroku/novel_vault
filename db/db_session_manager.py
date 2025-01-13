@@ -24,7 +24,7 @@ class DBSessionManager:
     # エンジンの作成
     _engine = create_engine(
         create_url(),
-        echo=False,
+        echo=True,
         pool_recycle=280,
         pool_pre_ping=True,
         connect_args={

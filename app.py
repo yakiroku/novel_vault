@@ -18,11 +18,13 @@ app = Flask(__name__)
 RESULTS_PER_PAGE = 50
 
 @app.route("/", methods=["GET", "POST"])
+@app.route("/search", methods=["GET", "POST"])
 def search():
     # 検索キーワードを取得（POST/GET のどちらにも対応）
     keyword = request.values.get("q", "").strip()
     sort_order = request.values.get("sort", "desc")  # デフォルトは降順
     page = int(request.values.get("page", 1))  # 現在のページ（デフォルトは1）
+    novel_id = request.values.get("novel_id")  # 小説IDで絞り込む
 
     # デフォルトの検索結果
     search_results = []
@@ -39,33 +41,38 @@ def search():
                 case "id_asc":
                     order_by = asc(ChapterModel.novel_id)
                 case "random":  # ランダム順を追加
-                    order_by = func.rand()  # SQLiteの場合。MySQLなら `func.rand()` を使用
+                    order_by = func.random()
                 case _:
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
-            # model = SentenceTransformerSingleton.get_model()
-            # embedding = model.encode(keyword).tolist()
-            # distance = ParagraphModel.embedding.cosine_distance(embedding).label('distance')
+            # クエリのベース
             stmt = (
                 select(
                     ChapterModel,
                     ParagraphModel,
                     NovelModel,
-                    # distance
                 )
-                .join(NovelModel, NovelModel.id == ChapterModel.novel_id)  # ChapterModelとNovelModelを結合
-                .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)  # ParagraphModelを結合
+                .join(NovelModel, NovelModel.id == ChapterModel.novel_id)
+                .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)
                 .filter(
                     and_(
-                        NovelModel.excluded == False,  # NovelModelのexcludedがFalseであること
-                        # distance < 0.4,  # ParagraphModelのdistanceが0.5より小さいこと
-                        ParagraphModel.content.like(f"%{keyword}%")
+                        NovelModel.excluded == False,
+                        ParagraphModel.content.like(f"%{keyword}%"),
                     )
                 )
-                # .order_by(asc(distance))  # 並び順を設定
-                .order_by(order_by, asc(ParagraphModel.id))  # 並び順を設定
             )
+
+
+            # 小説IDで絞り込む場合
+            if novel_id:
+                stmt = stmt.filter(ChapterModel.novel_id == int(novel_id))
+                # 並び順を設定
+                stmt = stmt.order_by(asc(ChapterModel.created_at), asc(ParagraphModel.id))
+            else:
+                # 並び順を設定
+                stmt = stmt.order_by(order_by, asc(ParagraphModel.id))
+
 
             # メインクエリ実行
             results = session.execute(stmt).all()
@@ -79,8 +86,8 @@ def search():
                     NovelTagModel.novel_id,
                     TagModel.name.label("tag_name")
                 )
-                .join(TagModel, TagModel.id == NovelTagModel.tag_id)  # TagModelと結合
-                .filter(NovelTagModel.novel_id.in_(novel_ids))  # novel_idsに基づいて絞り込み
+                .join(TagModel, TagModel.id == NovelTagModel.tag_id)
+                .filter(NovelTagModel.novel_id.in_(novel_ids))
             )
 
             # タグを取得
@@ -107,7 +114,6 @@ def search():
                 # paragraphをchapterごとに追加
                 grouped_results[chapter.id]["paragraphs"].append({
                     "content": paragraph.content,
-                    # "distance": dis  # distanceも一緒に保存
                 })
                 
                 # タグを追加
@@ -124,12 +130,10 @@ def search():
             # 検索結果の整形
             for result in paginated_results:
                 paragraphs = result["paragraphs"]
-                # app.logger.info(paragraphs)
                 chapter = result["chapter"]
                 novel = result["novel"]
-                tags = ", ".join(result["tags"])  # タグを文字列に結合
+                tags = ", ".join(result["tags"])
 
-                # キーワードの前後 200 文字を抜き出して概要を作成
                 for paragraph in paragraphs:
                     content = paragraph["content"]
                     idx = content.lower().find(keyword.lower())
@@ -137,7 +141,6 @@ def search():
                     summary_end = min(idx + len(keyword) + 200, len(content))
                     paragraph["content"] = content[summary_start:summary_end].replace("\n", " ").strip()
 
-                # 整形されたデータをリストに追加
                 search_results.append({
                     "novel_id": chapter.novel_id,
                     "title": novel.title,
@@ -158,6 +161,7 @@ def search():
         sort_order=sort_order,
         current_page=page,
         total_pages=total_pages,
+        novel_id=novel_id,  # フロントで使用するため渡す
     )
 
 @app.route('/exclude', methods=['POST'])

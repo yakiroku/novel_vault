@@ -29,7 +29,8 @@
         <ul>
             {% for result in results %}
                 <li>
-                    <h3>{{ result.title }}</h3>
+                    <h2><a href="/search?novel_id={{ result.novel_id }}&q={{ keyword }}">{{ result.title }}</a>
+                    </h2>
                     <p>{{ result.tags }}</p>
                     <p>著者: {{ result.author }}</p>
                     <h3><a href="{{ result.source_url }}" target="_blank">{{ result.chapter }}</a></h3>
