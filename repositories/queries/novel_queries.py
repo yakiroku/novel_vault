@@ -62,7 +62,7 @@ class NovelQueries:
         return (
             self.session.query(NovelModel)
             .filter(NovelModel.excluded == False, NovelModel.deleted == False)
-            .order_by(NovelModel.last_posted_at.desc())
+            .order_by(NovelModel.last_posted_at.asc())
             .all()
         )
 
