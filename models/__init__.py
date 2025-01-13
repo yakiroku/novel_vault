@@ -14,3 +14,4 @@ from models.tag_model import TagModel
 from models.search_tag_model import SearchTagModel
 from models.excluded_tag_model import ExcludedTagModel
 from models.paragraph_model import ParagraphModel
+from models.search_author_model import SearchAuthorModel

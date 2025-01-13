@@ -41,6 +41,15 @@ def main():
         f"ノクターンタグWEEK検索で {len(nocturne_weekly_tag_search_list)} 件の小説を取得しました。"
     )
 
+    # ノクターン作者検索
+    # nocturne_author_search = NovelSearchFactory.create_searcher(
+    #     SearchTarget.NOCTURNE_AUTHOR
+    # )
+    # logger.info("ノクターン作者検索を実行中...")
+    # nocturne_author_search_list = nocturne_author_search.fetch_novel_list()
+    # logger.info(
+    #     f"ノクターン作者検索で {len(nocturne_author_search_list)} 件の小説を取得しました。"
+    # )
     # PIXIVタグ検索
     # pixiv_tag_search = NovelSearchFactory.create_searcher(SearchTarget.PIXIV_TAG)
     # logger.info("PIXIVタグ検索を実行中...")
@@ -51,6 +60,7 @@ def main():
     all_novels.extend(nocturne_ranked_search_list)
     all_novels.extend(nocturne_tag_search_list)
     all_novels.extend(nocturne_weekly_tag_search_list)
+    # all_novels.extend(nocturne_author_search_list)
 
     # ノベルリストのアップサート
     with DBSessionManager.auto_commit_session() as session:

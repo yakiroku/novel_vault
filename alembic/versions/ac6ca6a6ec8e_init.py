@@ -11,7 +11,6 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from tidb_vector.sqlalchemy import VectorType
 
 # revision identifiers, used by Alembic.
 revision: str = "ac6ca6a6ec8e"

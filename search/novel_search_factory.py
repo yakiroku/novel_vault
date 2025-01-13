@@ -1,3 +1,4 @@
+from search.nocturne_author_search import NocturneAuthorSearch
 from search.nocturne_ranked_search import NocturneRankedSearch
 from search.nocturne_tag_search import NocturneTagSearch
 from search.nocturne_tag_weekly_search import NocturneTagWeeklySearch
@@ -25,6 +26,8 @@ class NovelSearchFactory:
                 return NocturneTagSearch()
             case SearchTarget.NOCTURNE_WEEKLY_TAG:
                 return NocturneTagWeeklySearch()
+            case SearchTarget.NOCTURNE_AUTHOR:
+                return NocturneAuthorSearch()
             # case SearchTarget.PIXIV_TAG:
             #     return PixivTagSearch()
             case _:
