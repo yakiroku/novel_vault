@@ -64,7 +64,7 @@ def search():
                     )
                 )
                 # .order_by(asc(distance))  # 並び順を設定
-                .order_by(order_by)  # 並び順を設定
+                .order_by(order_by, asc(ParagraphModel.id))  # 並び順を設定
             )
 
             # メインクエリ実行
