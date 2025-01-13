@@ -1,6 +1,6 @@
 import re
 from flask import Flask, redirect, request, render_template
-from sqlalchemy import and_, select, desc, asc
+from sqlalchemy import and_, func, select, desc, asc
 from math import ceil
 from db.db_session_manager import DBSessionManager
 from models import ChapterModel
@@ -38,6 +38,8 @@ def search():
                     order_by = asc(ChapterModel.posted_at)
                 case "id_asc":
                     order_by = asc(ChapterModel.novel_id)
+                case "random":  # ランダム順を追加
+                    order_by = func.rand()  # SQLiteの場合。MySQLなら `func.rand()` を使用
                 case _:
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
