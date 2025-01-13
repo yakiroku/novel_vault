@@ -22,7 +22,15 @@ class DBSessionManager:
         return url
 
     # エンジンの作成
-    _engine = create_engine(create_url(), echo=False, pool_pre_ping=True)
+    _engine = create_engine(
+        create_url(),
+        echo=False,
+        pool_recycle=280,
+        pool_pre_ping=True,
+        connect_args={
+            "connect_timeout": 10,  # 接続タイムアウト設定
+        },
+    )
 
     # セッションの作成
     _session = sessionmaker(bind=_engine)
