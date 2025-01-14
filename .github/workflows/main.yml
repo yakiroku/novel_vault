@@ -62,5 +62,6 @@ jobs:
           NOCTURNE_QUARTERLY_RANKED_URL: ${{ secrets.NOCTURNE_QUARTERLY_RANKED_URL }}
           NOCTURNE_YEARLY_RANKED_URL: ${{ secrets.NOCTURNE_YEARLY_RANKED_URL }}
           NOCTURNE_TAG_SEARCH_URL: ${{ secrets.NOCTURNE_TAG_SEARCH_URL }}
+          NOCTURNE_NOVEL_VIEW_URL: ${{ secrets.NOCTURNE_NOVEL_VIEW_URL }}
         run: |
           python main.py
