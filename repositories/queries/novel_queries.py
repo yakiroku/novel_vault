@@ -58,11 +58,15 @@ class NovelQueries:
             self.session.query(NovelModel).filter(NovelModel.source_url == source_url).one_or_none()
         )
 
-    def get_novel_list(self) -> list[NovelModel]:
+    def get_check_novel_list(self) -> list[NovelModel]:
         return (
             self.session.query(NovelModel)
-            .filter(NovelModel.excluded == False, NovelModel.deleted == False)
-            .order_by(NovelModel.last_posted_at.asc())
+            .filter(
+                NovelModel.excluded == False,
+                NovelModel.deleted == False,
+                NovelModel.completed == False,
+            )
+            .order_by(NovelModel.last_posted_at.desc())
             .all()
         )
 
@@ -95,10 +99,12 @@ class NovelQueries:
                 # 新規タグを作成
                 tag_model = tag_service.get_by_name(tag_name)
                 if not tag_model:
-                    new_tag = tag_service.insert(tag_name)  # 新しく追加されたタグのIDを取得可能にする
+                    new_tag = tag_service.insert(
+                        tag_name
+                    )  # 新しく追加されたタグのIDを取得可能にする
                 else:
                     new_tag = tag_model
-                    
+
                 # 新しいタグと小説を関連付ける
                 novel_tag = novel_tag_service.insert(novel_id=novel.id, tag_id=new_tag.id)
                 new_tags.append(novel_tag)

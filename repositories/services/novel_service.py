@@ -23,6 +23,12 @@ class NovelService:
             last_posted_at=novel_metadata.last_posted_at,
         )
 
+    def update_completed(self, source_url: str, completed: bool) -> NovelModel | None:
+        novel = self.query.get_nobel_by_source_url(source_url)
+        if novel:
+            novel.completed = completed
+            return novel
+
     def upsert_novel_list(self, novel_list: list[NovelSummary]):
         # 既存の小説リストを一括取得
         existing_novels = self.session.query(NovelModel).all()
@@ -50,8 +56,8 @@ class NovelService:
             # 新規挿入した小説を辞書に追加
             existing_novels_map[novel.source_url] = novel_model
 
-    def get_novel_list(self) -> list[NovelModel]:
-        return self.query.get_novel_list()
+    def get_check_novel_list(self) -> list[NovelModel]:
+        return self.query.get_check_novel_list()
 
     def exclude_novel(self, novel_id: int) -> None:
         """

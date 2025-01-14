@@ -16,3 +16,5 @@ class NovelMetadata(BaseModel):
     """小説のタグ"""
     last_posted_at: datetime
     """最終投稿日時"""
+    completed: bool
+    """小説の完結状態"""

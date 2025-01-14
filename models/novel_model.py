@@ -39,7 +39,7 @@ class NovelModel(Base):
         Boolean, default=False, nullable=False, index=True
     )  # 除外フラグを追加
     deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-
+    completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     # リレーション
     chapters: Mapped[list["ChapterModel"]] = relationship("ChapterModel", back_populates="novel")
     novel_tags: Mapped[list["NovelTagModel"]] = relationship(

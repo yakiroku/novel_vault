@@ -19,16 +19,23 @@ class ChapterHistoryModel(Base):
     __tablename__ = "chapter_histories"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    """id"""
     chapter_id: Mapped[int] = mapped_column(Integer, ForeignKey("chapters.id"), nullable=False)
+    """小説の章のid"""
     title: Mapped[str] = mapped_column(Text, nullable=False)
+    """小説の章のタイトル"""
     content: Mapped[str] = mapped_column(LONGTEXT, nullable=False)
+    """小説の章の内容"""
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    """小説の章の投稿日時"""
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(LOCAL_TZ), nullable=False
     )
+    """作成日時"""
 
     # リレーション
     chapter: Mapped["ChapterModel"] = relationship("ChapterModel", back_populates="histories")
+    """小説の章のリレーション"""
 
     # 制約の名前を付ける
     __table_args__ = (

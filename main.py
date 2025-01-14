@@ -42,14 +42,14 @@ def main():
     )
 
     # ノクターン作者検索
-    # nocturne_author_search = NovelSearchFactory.create_searcher(
-    #     SearchTarget.NOCTURNE_AUTHOR
-    # )
-    # logger.info("ノクターン作者検索を実行中...")
-    # nocturne_author_search_list = nocturne_author_search.fetch_novel_list()
-    # logger.info(
-    #     f"ノクターン作者検索で {len(nocturne_author_search_list)} 件の小説を取得しました。"
-    # )
+    nocturne_author_search = NovelSearchFactory.create_searcher(
+        SearchTarget.NOCTURNE_AUTHOR
+    )
+    logger.info("ノクターン作者検索を実行中...")
+    nocturne_author_search_list = nocturne_author_search.fetch_novel_list()
+    logger.info(
+        f"ノクターン作者検索で {len(nocturne_author_search_list)} 件の小説を取得しました。"
+    )
     # PIXIVタグ検索
     # pixiv_tag_search = NovelSearchFactory.create_searcher(SearchTarget.PIXIV_TAG)
     # logger.info("PIXIVタグ検索を実行中...")
@@ -60,12 +60,12 @@ def main():
     all_novels.extend(nocturne_ranked_search_list)
     all_novels.extend(nocturne_tag_search_list)
     all_novels.extend(nocturne_weekly_tag_search_list)
-    # all_novels.extend(nocturne_author_search_list)
+    all_novels.extend(nocturne_author_search_list)
 
     # ノベルリストのアップサート
     with DBSessionManager.auto_commit_session() as session:
         novel_service = NovelService(session)
-        _ = novel_service.get_novel_list()
+        _ = novel_service.get_check_novel_list()
         novel_service.upsert_novel_list(all_novels)
         logger.info("ノベルリストをデータベースにアップサートしました。")
 
@@ -74,7 +74,7 @@ def main():
         novel_service = NovelService(session)
         chapter_service = ChapterService(session)
         excluded_tag_service = ExcludedTagService(session)
-        novel_list = novel_service.get_novel_list()
+        novel_list = novel_service.get_check_novel_list()
         logger.info(f"{len(novel_list)} 件の小説がデータベースにあります。")
 
         excluded_tags = excluded_tag_service.get_all()
@@ -104,8 +104,16 @@ def main():
                 if excluded_flg == True:
                     continue
 
+            if novel.completed != novel_metadata.completed:
+                novel_service.update_completed(novel.source_url, novel_metadata.completed)
+                logger.info(
+                    f"({novel_index}/{len(novel_list)}) 小説 {novel.title} の完了状態を{novel_metadata.completed}に更新しました。"
+                )
+
             if novel.last_posted_at.astimezone(LOCAL_TZ) >= novel_metadata.last_posted_at:
-                # logger.info(f"({novel_index}/{len(novel_list)}) {novel.title}は未更新のためスキップします。")
+                logger.info(
+                    f"({novel_index}/{len(novel_list)}) {novel.title}は未更新のためスキップします。"
+                )
                 continue
             novel_service.update(novel.source_url, novel_metadata)
             logger.info(

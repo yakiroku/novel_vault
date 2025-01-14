@@ -9,6 +9,7 @@ from settings import LOCAL_TZ
 from shared.schemas.chapter import Chapter
 from shared.schemas.chapter_content import ChapterContent
 from shared.schemas.novel_metadata import NovelMetadata
+from util.env_config_loader import EnvConfigLoader
 from util.nocturne_helper import NocturneHelper
 from util.scraping_helper import ScrapingHelper
 
@@ -56,7 +57,7 @@ class NocturneScraper(NovelScraperInterface):
         description_element = soup.select_one(".p-novel__summary")
         description = description_element.text.strip() if description_element else "説明なし"
 
-        #タグを取得
+        # タグを取得
         # meta タグの content 属性からタグを取得
         meta_tag = soup.find("meta", attrs={"property": "og:description"})
         if meta_tag and isinstance(meta_tag, Tag) and "content" in meta_tag.attrs:
@@ -80,7 +81,27 @@ class NocturneScraper(NovelScraperInterface):
             last_posted_at_datetime = datetime.strptime(last_posted_at, "%Y/%m/%d %H:%M")
             last_posted_at_datetime = LOCAL_TZ.localize(last_posted_at_datetime)
         except ValueError:
-            last_posted_at_datetime = datetime(1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ)  # フォーマットが合わない場合はNoneにする
+            last_posted_at_datetime = datetime(
+                1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ
+            )  # フォーマットが合わない場合はNoneにする
+
+        novel_code = self.extract_identifier_from_url(self.novel.source_url)
+        novel_view_url = f"{EnvConfigLoader.get_variable("NOCTURNE_NOVEL_VIEW_URL")}{novel_code}"
+        response = NocturneHelper.request(novel_view_url)
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+
+        # BeautifulSoupを使ってHTMLを解析
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # ノベルタイプを取得
+        completed = False
+        novel_type = soup.select_one("#noveltype")
+        novel_type = novel_type.text.strip() if novel_type else ""
+        print(novel_type)
+        if novel_type == "完結済" or novel_type == "短編":
+            completed = True
 
         return NovelMetadata(
             title=title,
@@ -88,6 +109,7 @@ class NocturneScraper(NovelScraperInterface):
             description=description,
             tags=tags,
             last_posted_at=last_posted_at_datetime,
+            completed=completed,
         )
 
     def fetch_chapter_list(self, novel_metadata: NovelMetadata) -> list[Chapter]:
@@ -157,7 +179,11 @@ class NocturneScraper(NovelScraperInterface):
                         Chapter(
                             title=title,
                             source_url="https://novel18.syosetu.com" + url,
-                            posted_at=posted_at if posted_at else datetime(1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ),
+                            posted_at=(
+                                posted_at
+                                if posted_at
+                                else datetime(1970, 1, 1, 0, 0, 0, tzinfo=LOCAL_TZ)
+                            ),
                         )
                     )
 
@@ -205,3 +231,13 @@ class NocturneScraper(NovelScraperInterface):
             return ChapterContent(content=content.text.strip())
         else:
             return ChapterContent(content="コンテンツが見つかりませんでした")
+
+    def extract_identifier_from_url(self, url: str) -> str:
+        """
+        URLから小説IDを抽出する
+        """
+        pattern = r"/(n[0-9a-zA-Z]+)/"
+
+        match = re.search(pattern, url)
+
+        return match.group(1) if match else ""
