@@ -17,6 +17,7 @@ app = Flask(__name__)
 # 1ページに表示する結果数
 RESULTS_PER_PAGE = 50
 
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/search", methods=["GET", "POST"])
 def search():
@@ -46,6 +47,7 @@ def search():
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
+            tag_names = ["NTR","寝取られ","レイプ","凌辱"]
             # クエリのベース
             stmt = (
                 select(
@@ -55,14 +57,16 @@ def search():
                 )
                 .join(NovelModel, NovelModel.id == ChapterModel.novel_id)
                 .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)
+                .join(NovelTagModel, NovelTagModel.novel_id == NovelModel.id)
+                .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)
                 .filter(
-                    and_(
+                       and_(
                         NovelModel.excluded == False,
                         ParagraphModel.content.like(f"%{keyword}%"),
+                        TagModel.name.in_(tag_names)
                     )
                 )
             )
-
 
             # 小説IDで絞り込む場合
             if novel_id:
@@ -73,7 +77,6 @@ def search():
                 # 並び順を設定
                 stmt = stmt.order_by(order_by, asc(ParagraphModel.id))
 
-
             # メインクエリ実行
             results = session.execute(stmt).all()
 
@@ -82,10 +85,7 @@ def search():
 
             # タグを取得するクエリ
             tag_stmt = (
-                select(
-                    NovelTagModel.novel_id,
-                    TagModel.name.label("tag_name")
-                )
+                select(NovelTagModel.novel_id, TagModel.name.label("tag_name"))
                 .join(TagModel, TagModel.id == NovelTagModel.tag_id)
                 .filter(NovelTagModel.novel_id.in_(novel_ids))
             )
@@ -110,12 +110,14 @@ def search():
                         "tags": set(),
                         "paragraphs": [],
                     }
-                
+
                 # paragraphをchapterごとに追加
-                grouped_results[chapter.id]["paragraphs"].append({
-                    "content": paragraph.content,
-                })
-                
+                grouped_results[chapter.id]["paragraphs"].append(
+                    {
+                        "content": paragraph.content,
+                    }
+                )
+
                 # タグを追加
                 if novel.id in tags_by_novel:
                     grouped_results[chapter.id]["tags"].update(tags_by_novel[novel.id])
@@ -139,19 +141,23 @@ def search():
                     idx = content.lower().find(keyword.lower())
                     summary_start = max(idx - 30, 0)
                     summary_end = min(idx + len(keyword) + 200, len(content))
-                    paragraph["content"] = content[summary_start:summary_end].replace("\n", " ").strip()
+                    paragraph["content"] = (
+                        content[summary_start:summary_end].replace("\n", " ").strip()
+                    )
 
-                search_results.append({
-                    "novel_id": chapter.novel_id,
-                    "title": novel.title,
-                    "author": novel.author,
-                    "tags": tags,
-                    "chapter": chapter.title,
-                    "paragraphs": paragraphs,
-                    "source_url": chapter.source_url,
-                    "id": chapter.id,
-                    "posted_at": chapter.posted_at.strftime("%Y-%m-%d %H:%M"),
-                })
+                search_results.append(
+                    {
+                        "novel_id": chapter.novel_id,
+                        "title": novel.title,
+                        "author": novel.author,
+                        "tags": tags,
+                        "chapter": chapter.title,
+                        "paragraphs": paragraphs,
+                        "source_url": chapter.source_url,
+                        "id": chapter.id,
+                        "posted_at": chapter.posted_at.strftime("%Y-%m-%d %H:%M"),
+                    }
+                )
 
     # 検索結果を表示
     return render_template(
@@ -164,9 +170,10 @@ def search():
         novel_id=novel_id,  # フロントで使用するため渡す
     )
 
-@app.route('/exclude', methods=['POST'])
+
+@app.route("/exclude", methods=["POST"])
 def exclude_novel():
-    novel_id = request.form.get('novel_id')
+    novel_id = request.form.get("novel_id")
     if novel_id is not None:
         with DBSessionManager.auto_commit_session() as session:
             novel_service = NovelService(session)
@@ -176,28 +183,29 @@ def exclude_novel():
     return redirect(request.referrer)
 
 
-@app.route('/chapter/<int:id>', methods=['GET'])
+@app.route("/chapter/<int:id>", methods=["GET"])
 def show_chapter(id):
     app.logger.debug("chapter")
     # Chapterのデータをデータベースから取得
     with DBSessionManager.session() as session:
         chapter_service = ChapterService(session)
         chapter = chapter_service.get_by_id(id)
-    
+
     # 該当の章が見つからない場合は404エラーを返す
     # if chapter is None:
     #     abort(404)
     if chapter is not None and chapter.content is not None:
         chapter.content = break_text_by_punctuation(chapter.content)
         # app.logger.debug(chapter.content)
-        
+
     # 取得した章をテンプレートに渡して表示
-    return render_template('chapter.html', chapter=chapter)
-    
+    return render_template("chapter.html", chapter=chapter)
+
+
 def break_text_by_punctuation(text: str) -> str:
     # 句読点（。や、）で文章を区切り、改行を挿入する
     # ここでは「。」や「,」の後に改行を挿入する
-    text = re.sub(r'([。」])', r'\1\n', text)
+    text = re.sub(r"([。」])", r"\1\n", text)
     return text
 
 
