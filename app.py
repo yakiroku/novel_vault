@@ -47,7 +47,7 @@ def search():
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
-            tag_names = ["NTR","寝取られ","レイプ","凌辱"]
+            tag_names = ["NTR","寝取られ"]
             # クエリのベース
             stmt = (
                 select(
