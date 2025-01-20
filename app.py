@@ -66,6 +66,7 @@ def search():
                         TagModel.name.in_(tag_names)
                     )
                 )
+                .distinct()
             )
 
             # 小説IDで絞り込む場合
