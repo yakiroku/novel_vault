@@ -58,12 +58,12 @@ def search():
                 .join(NovelModel, NovelModel.id == ChapterModel.novel_id)
                 .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)
                 .join(NovelTagModel, NovelTagModel.novel_id == NovelModel.id)
-                .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)
+                # .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)
                 .filter(
                        and_(
                         NovelModel.excluded == False,
                         ParagraphModel.content.like(f"%{keyword}%"),
-                        TagModel.name.in_(tag_names)
+                        # TagModel.name.in_(tag_names)
                     )
                 )
                 .distinct()
