@@ -1,4 +1,5 @@
 from models.novel_model import NovelModel
+from scrapes.kakuyomu_scraper import KakuyomuScraper
 from scrapes.nocturne_scraper import NocturneScraper
 from scrapes.scraper_interface import NovelScraperInterface
 from shared.enums.site import Site
@@ -19,7 +20,10 @@ class ScraperFactory:
         Returns:
             NovelScraperInterface: 対応するスクレイパー
         """
-        if novel.site == Site.NOCTURNE.value:
-            return NocturneScraper(novel)
-        else:
-            raise ValueError(f"Unsupported site: {novel.source_url}")
+        match novel.site:
+            case Site.NOCTURNE.value:
+                return NocturneScraper(novel)
+            case Site.KAKUYOMU.value:
+                return KakuyomuScraper(novel)
+            case _:
+                raise ValueError(f"Unsupported site: {novel.source_url}")

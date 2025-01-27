@@ -51,16 +51,26 @@ def main():
         f"ノクターン作者検索で {len(nocturne_author_search_list)} 件の小説を取得しました。"
     )
     # PIXIVタグ検索
-    # pixiv_tag_search = NovelSearchFactory.create_searcher(SearchTarget.PIXIV_TAG)
-    # logger.info("PIXIVタグ検索を実行中...")
-    # pixiv_tag_search_list = pixiv_tag_search.fetch_novel_list()
-    # logger.info(f"PIXIVタグ検索で {len(pixiv_tag_search_list)} 件の小説を取得しました。")
+    pixiv_tag_search = NovelSearchFactory.create_searcher(SearchTarget.PIXIV_TAG)
+    logger.info("PIXIVタグ検索を実行中...")
+    pixiv_tag_search_list = pixiv_tag_search.fetch_novel_list()
+    logger.info(f"PIXIVタグ検索で {len(pixiv_tag_search_list)} 件の小説を取得しました。")
 
+    # カクヨム検索
+    kakuyomu_tag_search = NovelSearchFactory.create_searcher(
+        SearchTarget.KAKUYOMU_TAG
+    )
+    logger.info("カクヨム検索を実行中...")
+    kakuyomu_tag_search_list = kakuyomu_tag_search.fetch_novel_list()
+    logger.info(
+        f"カクヨム検索で {len(kakuyomu_tag_search_list)} 件の小説を取得しました。"
+    )
     all_novels = []
     all_novels.extend(nocturne_ranked_search_list)
     all_novels.extend(nocturne_tag_search_list)
     all_novels.extend(nocturne_weekly_tag_search_list)
     all_novels.extend(nocturne_author_search_list)
+    all_novels.extend(kakuyomu_tag_search_list)
 
     # ノベルリストのアップサート
     with DBSessionManager.auto_commit_session() as session:

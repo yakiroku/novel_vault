@@ -7,3 +7,4 @@ class SearchTarget(Enum):
     PIXIV_TAG = "pixiv_tag"
     NOCTURNE_WEEKLY_TAG = "nocturne_weekly_tag" 
     NOCTURNE_AUTHOR = "nocturne_author"
+    KAKUYOMU_TAG = "kakuyomu_tag"

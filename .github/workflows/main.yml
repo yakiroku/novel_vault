@@ -3,7 +3,7 @@ on:
   push:
   workflow_dispatch:
   schedule:
-    - cron: "0 3,15 * * *"  # 日本時間で午前3時と午後3時
+    - cron: "0 3,18 * * *"  # 日本時間で午前3時と午後3時
 
 jobs:
   build:
@@ -63,5 +63,6 @@ jobs:
           NOCTURNE_YEARLY_RANKED_URL: ${{ secrets.NOCTURNE_YEARLY_RANKED_URL }}
           NOCTURNE_TAG_SEARCH_URL: ${{ secrets.NOCTURNE_TAG_SEARCH_URL }}
           NOCTURNE_NOVEL_VIEW_URL: ${{ secrets.NOCTURNE_NOVEL_VIEW_URL }}
+          KAKUYOMU_TAG_SEARCH_URL: ${{ secrets.KAKUYOMU_TAG_SEARCH_URL }}
         run: |
           python main.py

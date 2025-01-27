@@ -1,3 +1,4 @@
+from search.kakuyomu_tag_search import KakuyomuTagSearch
 from search.nocturne_author_search import NocturneAuthorSearch
 from search.nocturne_ranked_search import NocturneRankedSearch
 from search.nocturne_tag_search import NocturneTagSearch
@@ -28,6 +29,8 @@ class NovelSearchFactory:
                 return NocturneTagWeeklySearch()
             case SearchTarget.NOCTURNE_AUTHOR:
                 return NocturneAuthorSearch()
+            case SearchTarget.KAKUYOMU_TAG:
+                return KakuyomuTagSearch()
             # case SearchTarget.PIXIV_TAG:
             #     return PixivTagSearch()
             case _:
