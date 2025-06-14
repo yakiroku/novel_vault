@@ -7,7 +7,16 @@ class NovelTagQueries:
         self.session = session
 
     def insert(self, novel_id: int, tag_id: int) -> NovelTagModel:
+        existing = (
+            self.session.query(NovelTagModel)
+            .filter_by(novel_id=novel_id, tag_id=tag_id)
+            .first()
+        )
+        if existing:
+            return existing  # 既に存在するなら再利用
+    
         novel_tag = NovelTagModel(novel_id=novel_id, tag_id=tag_id)
+        
         self.session.add(novel_tag)
         self.session.flush()
 
