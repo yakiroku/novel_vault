@@ -30,8 +30,8 @@ class ChapterQueries:
                 content=paragragh_service.chapter_content(chapter_id=chapter.id),
                 posted_at=chapter.posted_at,
             )
-            self.session.add(history)
-            self.session.flush()
+            # self.session.add(history)
+            # self.session.flush()
 
             chapter.title = title
             chapter.posted_at = posted_at
