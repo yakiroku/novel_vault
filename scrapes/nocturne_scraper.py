@@ -226,7 +226,7 @@ class NocturneScraper(NovelScraperInterface):
         soup = BeautifulSoup(response.text, "html.parser")
 
         # 章本文がある要素を特定
-        content = soup.select_one(".p-novel__text")  # 小説本文のID
+        content = soup.select_one(".p-novel__text:not(.p-novel__text--preface)")  # 小説本文のID
         if content:
             return ChapterContent(content=content.text.strip())
         else:
