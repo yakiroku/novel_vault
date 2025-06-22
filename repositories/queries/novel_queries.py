@@ -66,7 +66,7 @@ class NovelQueries:
             .filter(
                 NovelModel.excluded == False,
                 NovelModel.deleted == False,
-                # NovelModel.completed == False,
+                NovelModel.completed == False,
             )
             .order_by(NovelModel.last_posted_at.asc())
             .all()
