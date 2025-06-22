@@ -1,8 +1,10 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 from models.novel_model import NovelModel
+from models.novel_tag_model import NovelTagModel
 from repositories.services.novel_tag_service import NovelTagService
 from repositories.services.tag_service import TagService
+from sqlalchemy.orm import joinedload
 
 
 class NovelQueries:
@@ -64,9 +66,9 @@ class NovelQueries:
             .filter(
                 NovelModel.excluded == False,
                 NovelModel.deleted == False,
-                NovelModel.completed == False,
+                # NovelModel.completed == False,
             )
-            .order_by(NovelModel.last_posted_at.desc())
+            .order_by(NovelModel.last_posted_at.asc())
             .all()
         )
 
@@ -116,3 +118,16 @@ class NovelQueries:
 
         # novelのtagsを更新
         novel.novel_tags = new_tags  # 中間テーブルを通じて更新されたタグリストをセット
+
+    def excluded_novels(self) -> list[NovelModel]:
+        return (
+            self.session.query(NovelModel)
+            .options(
+                joinedload(NovelModel.novel_tags).joinedload(
+                    NovelTagModel.tag
+                )  # タグのリレーションをロード
+            )
+            .filter(NovelModel.excluded == True)
+            .order_by(NovelModel.last_posted_at.desc())
+            .all()
+        )
