@@ -68,7 +68,7 @@ class NovelQueries:
                 NovelModel.deleted == False,
                 NovelModel.completed == False,
             )
-            .order_by(NovelModel.last_posted_at.asc())
+            .order_by(NovelModel.last_posted_at.desc())
             .all()
         )
 
