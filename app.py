@@ -63,7 +63,7 @@ def search():
                        and_(
                         NovelModel.excluded == False,
                         ParagraphModel.content.like(f"%{keyword}%"),
-                        # TagModel.name.in_(tag_names)
+                        TagModel.name.in_(tag_names)
                     )
                 )
                 .distinct()
