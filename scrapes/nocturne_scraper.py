@@ -12,8 +12,10 @@ from shared.schemas.novel_metadata import NovelMetadata
 from util.env_config_loader import EnvConfigLoader
 from util.nocturne_helper import NocturneHelper
 from util.scraping_helper import ScrapingHelper
+import logging
 
-
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 class NocturneScraper(NovelScraperInterface):
     """Nocturneサイト専用のスクレイパークラス"""
 
@@ -97,9 +99,10 @@ class NocturneScraper(NovelScraperInterface):
 
         # ノベルタイプを取得
         completed = False
-        novel_type = soup.select_one("#noveltype")
+        novel_type = soup.select_one(".p-infotop-type__type")
         novel_type = novel_type.text.strip() if novel_type else ""
-        print(novel_type)
+
+        logger.info(novel_type)
         if novel_type == "完結済" or novel_type == "短編":
             completed = True
 

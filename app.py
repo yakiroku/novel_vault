@@ -47,7 +47,7 @@ def search():
                     # デフォルトのソート順を設定
                     order_by = desc(ChapterModel.posted_at)
 
-            tag_names = ["NTR","寝取られ"]
+            tag_names = ["NTR", "寝取られ"]
             # クエリのベース
             stmt = (
                 select(
@@ -58,7 +58,7 @@ def search():
                 .join(NovelModel, NovelModel.id == ChapterModel.novel_id)
                 .outerjoin(ParagraphModel, ParagraphModel.chapter_id == ChapterModel.id)
                 .join(NovelTagModel, NovelTagModel.novel_id == NovelModel.id)
-                # .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)
+                .outerjoin(TagModel, TagModel.id == NovelTagModel.tag_id)
                 .filter(
                        and_(
                         NovelModel.excluded == False,
@@ -195,18 +195,29 @@ def show_chapter(id):
     # 該当の章が見つからない場合は404エラーを返す
     # if chapter is None:
     #     abort(404)
-    if chapter is not None and chapter.content is not None:
-        chapter.content = break_text_by_punctuation(chapter.content)
+        if chapter is not None and chapter.paragraphs is not None:
+            chapter.content = break_text_by_punctuation(chapter.paragraphs)
         # app.logger.debug(chapter.content)
 
     # 取得した章をテンプレートに渡して表示
     return render_template("chapter.html", chapter=chapter)
 
+@app.route("/excluded_novels")
+def excluded_novels():
+    """
+    除外された小説一覧を表示する
+    """
+    with DBSessionManager.session() as session:
+        novel_service = NovelService(session)
+        novels = novel_service.excluded_novels()
+    return render_template("excluded_novels.html", novels=novels)
 
-def break_text_by_punctuation(text: str) -> str:
-    # 句読点（。や、）で文章を区切り、改行を挿入する
-    # ここでは「。」や「,」の後に改行を挿入する
-    text = re.sub(r"([。」])", r"\1\n", text)
+def break_text_by_punctuation(paragraphs: list[ParagraphModel]) -> str:
+    text = ""
+    for paragraph in paragraphs:
+        # 句読点（。や、）で文章を区切り、改行を挿入する
+        # ここでは「。」や「,」の後に改行を挿入する
+        text += re.sub(r"([。」])", r"\1\n", paragraph.content)
     return text
 
 

@@ -1,7 +1,9 @@
 import os
+from dotenv import load_dotenv
 
 class EnvConfigLoader:
     """環境変数を安全に読み込むためのヘルパークラス"""
+    load_dotenv()
 
     @staticmethod
     def get_variable(key: str) -> str:

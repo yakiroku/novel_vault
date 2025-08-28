@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>除外された小説一覧</title>
+</head>
+<body>
+    <h1>除外された小説一覧</h1>
+    {% if novels %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>タイトル</th>
+                    <th>著者</th>
+                    <th>説明</th>
+                    <th>タグ</th>
+                    <th>サイト</th>
+                    <th>最終更新日</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for novel in novels %}
+                    <tr>
+                        <td>{{ novel.id }}</td>
+                        <td>{{ novel.title }}</td>
+                        <td>{{ novel.author }}</td>
+                        <td>{{ novel.description }}</td>
+                        <td>
+                            {% for novel_tag in novel.novel_tags %}
+                                {{ novel_tag.tag.name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td>{{ novel.site }}</td>
+                        <td>{{ novel.last_posted_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>除外された小説はありません。</p>
+    {% endif %}
+</body>
+</html>

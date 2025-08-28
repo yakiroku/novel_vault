@@ -76,3 +76,7 @@ class NovelService:
         :param novel_id: 削除する小説のID
         """
         self.query.delete_novel(novel_id)
+
+
+    def excluded_novels(self) -> list[NovelModel]:
+        return self.query.excluded_novels()
