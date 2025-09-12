@@ -42,7 +42,15 @@ class KakuyomuTagSearch(NovelSearchInterface):
         novel_summary_list = []
 
         # ページにリクエストを送信
-        response = requests.get(url)
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+        }
+        response = requests.get(url, headers=headers) 
         response.raise_for_status()
 
         # HTML解析
