@@ -9,6 +9,7 @@ from models.novel_tag_model import NovelTagModel
 from models.paragraph_model import ParagraphModel
 from models.tag_model import TagModel
 from repositories.services.chapter_service import ChapterService
+# from repositories.services.novel_favorite_service import NovelFavoriteService
 from repositories.services.novel_service import NovelService
 
 # Flask アプリケーションの初期化
@@ -63,7 +64,7 @@ def search():
                        and_(
                         NovelModel.excluded == False,
                         ParagraphModel.content.like(f"%{keyword}%"),
-                        TagModel.name.in_(tag_names)
+                        # TagModel.name.in_(tag_names)
                     )
                 )
                 .distinct()
@@ -183,6 +184,17 @@ def exclude_novel():
     # 元の検索結果ページにリダイレクト
     return redirect(request.referrer)
 
+# @app.route("/novel_favorites", methods=["POST"])
+# def novel_favorites():
+#     novel_id = request.form.get("novel_id")
+#     tags = request.form.get("tags")
+#     if novel_id is not None:
+#         with DBSessionManager.auto_commit_session() as session:
+#             novel_favorite_service = NovelFavoriteService(session)
+#             novel_favorite_service.favorite(int(novel_id), tags)
+
+#     # 元の検索結果ページにリダイレクト
+#     return redirect(request.referrer)
 
 @app.route("/chapter/<int:id>", methods=["GET"])
 def show_chapter(id):
