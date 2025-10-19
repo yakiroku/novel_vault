@@ -8,3 +8,4 @@ pydantic
 beautifulsoup4
 flask
 langchain
+langchain-text-splitters
