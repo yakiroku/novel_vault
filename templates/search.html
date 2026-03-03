@@ -6,7 +6,12 @@
 </head>
 <body>
     <h1>小説検索</h1>
-    <form action="/" method="get">
+    {% if novel_id %}
+        <form action="/search" method="get">
+            <input type="hidden" name="novel_id" value="{{ novel_id }}">
+    {% else %}
+        <form action="/" method="get">
+    {% endif %}
         <!-- 検索ボックス -->
         <input type="text" name="q" placeholder="検索キーワードを入力" value="{{ keyword }}">
         
@@ -61,11 +66,19 @@
     {% if total_pages > 1 %}
         <div>
             {% if current_page > 1 %}
-                <a href="?q={{ keyword }}&sort={{ sort_order }}&page={{ current_page - 1 }}">前のページ</a>
+                {% if novel_id %}
+                    <a href="/search?novel_id={{ novel_id }}&q={{ keyword }}&sort={{ sort_order }}&page={{ current_page - 1 }}">前のページ</a>
+                {% else %}
+                    <a href="?q={{ keyword }}&sort={{ sort_order }}&page={{ current_page - 1 }}">前のページ</a>
+                {% endif %}
             {% endif %}
             <span>ページ {{ current_page }} / {{ total_pages }}</span>
             {% if current_page < total_pages %}
-                <a href="?q={{ keyword }}&sort={{ sort_order }}&page={{ current_page + 1 }}">次のページ</a>
+                {% if novel_id %}
+                    <a href="/search?novel_id={{ novel_id }}&q={{ keyword }}&sort={{ sort_order }}&page={{ current_page + 1 }}">次のページ</a>
+                {% else %}
+                    <a href="?q={{ keyword }}&sort={{ sort_order }}&page={{ current_page + 1 }}">次のページ</a>
+                {% endif %}
             {% endif %}
         </div>
     {% endif %}
