@@ -13,7 +13,7 @@ from repositories.services.chapter_service import ChapterService
 # from repositories.services.novel_favorite_service import NovelFavoriteService
 from repositories.services.novel_service import NovelService
 
-# Flask アプリケーションの初期化
+# Flask アプリケーションの初期化a
 app = Flask(__name__)
 
 # 1ページに表示する結果数
