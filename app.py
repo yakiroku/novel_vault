@@ -34,7 +34,7 @@ def search():
     if keyword:
         with DBSessionManager.session() as session:
             # --- タグ絞り込み用の設定 ---
-            tag_names = ["NTR", "寝取られ"]
+            tag_names = ["NTR","BSS",  "寝取られ"]
             # 1. ページネーション用の「総件数」を取得 (count)
             # 巨大なデータを取得しないので、ここは軽量です
             count_stmt = (
@@ -47,7 +47,7 @@ def search():
                     and_(
                         NovelModel.excluded == False,
                         ParagraphModel.content.like(f"%{keyword}%"),
-                        # TagModel.name.in_(tag_names)  # タグで絞り込み
+                        TagModel.name.in_(tag_names)  # タグで絞り込み
                     )
                 )
             )
@@ -96,7 +96,7 @@ def search():
                     and_(
                         NovelModel.excluded == False,
                         ParagraphModel.content.like(f"%{keyword}%"),
-                        # TagModel.name.in_(tag_names)  # タグで絞り込み
+                        TagModel.name.in_(tag_names)  # タグで絞り込み
                     )
                 )
                 .order_by(order_by)
